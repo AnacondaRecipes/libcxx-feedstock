@@ -55,9 +55,9 @@ test:
 
   # Following 2 projects had issues with libc++, so check them
   # before releasing just to be sure.
-  downstreams:   # [osx]
-    - python-symengine  # [osx]
-    - openturns         # [osx]
+  # downstreams:   # [osx]
+  #  - python-symengine  # [osx]
+  #  - openturns         # [osx]
 
 outputs:
   - name: libcxx
