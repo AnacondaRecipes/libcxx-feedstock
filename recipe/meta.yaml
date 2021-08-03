@@ -48,7 +48,7 @@ outputs:
     test:
       requires:
         - clang                  # [osx]
-        - clangxxcls
+        - clangxx
         - ld64                   # [osx]
         - cctools                # [osx]
         - llvm-tools             # [osx]
@@ -71,10 +71,10 @@ outputs:
 
       # Following 2 projects had issues with libc++, so check them
       # before releasing just to be sure.
-      downstreams:   # [osx]
-        - python-symengine  # [osx]
-        - openturns         # [osx]
-        - libcxx-testing    # [osx]
+      # downstreams:   # [osx]
+      #  - python-symengine  # [osx]
+      #  - openturns         # [osx]
+      #  - libcxx-testing    # [osx]
 
   - name: libcxxabi
     build:
@@ -103,3 +103,4 @@ extra:
     - isuruf
     - beckermr
     - timsnyder
+    - katietz
