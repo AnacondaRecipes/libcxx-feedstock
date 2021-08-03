@@ -1,8 +1,11 @@
-set -e
+set -xe
 
-LINK_FLAGS="-Wl,-rpath,$PREFIX/lib -L$PREFIX/lib"
+LINK_FLAGS="-Wl,-rpath,$PREFIX/lib -L$PREFIX/lib -Wl,-v -v"
 
-if [[ "$target_platform" != "osx-64" ]]; then
+# target platform is empty here now
+if [[ "$target_platform" == osx* ]]; then
+    llvm-nm $PREFIX/lib/libc++.1.dylib
+else
     LINK_FLAGS="${LINK_FLAGS} -lc++abi"
 fi
 
