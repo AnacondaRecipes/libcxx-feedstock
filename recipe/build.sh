@@ -65,17 +65,22 @@ else
     mkdir build
     cd build
 
+    LDFLAGS="${LDFLAGS} -mlinker-version=305"
+
+    CM_ARGS='-DLIBCXX_ENABLE_NEW_DELETE_DEFINITIONS=ON'
+
     # on osx we point libc++ to the system libc++abi
-    cmake \
+    cmake ${CM_ARGS} \
       -DCMAKE_INSTALL_PREFIX=$PREFIX \
       -DCMAKE_BUILD_TYPE=Release \
       -DLIBCXX_CXX_ABI=libcxxabi \
+      -DCMAKE_C_FLAGS=-mlinker-version=305 \
+      -DCMAKE_CXX_FLAGS=-mlinker-version=305 \
       -DLIBCXX_CXX_ABI_INCLUDE_PATHS=${CONDA_BUILD_SYSROOT}/usr/include \
       -DLIBCXX_CXX_ABI_LIBRARY_PATH=${CONDA_BUILD_SYSROOT}/usr/lib \
       -DCMAKE_OSX_SYSROOT=$CONDA_BUILD_SYSROOT \
       -DLLVM_INCLUDE_TESTS=OFF \
       -DLLVM_INCLUDE_DOCS=OFF \
-      -DLIBCXX_ENABLE_NEW_DELETE_DEFINITIONS=ON \
       ../libcxx
 
     make -j${CPU_COUNT} VERBOSE=1
