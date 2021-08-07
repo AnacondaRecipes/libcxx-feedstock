@@ -12,7 +12,7 @@ source:
       - patches/0002-libcxx-legacy-standalone-build.patch
 
 build:
-  number: 0
+  number: 1
   skip: true  # [win and vc<14]
   skip: true  # [win]
   skip: true  # [ppc64le or aarch64]
@@ -49,6 +49,7 @@ outputs:
       requires:
         - clang                  # [osx]
         - clangxx
+        - compiler-rt            # [osx]
         - ld64                   # [osx]
         - cctools                # [osx]
         - llvm-tools             # [osx]
