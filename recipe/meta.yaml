@@ -27,7 +27,9 @@ requirements:
     - make                    # [unix]
     - {{ compiler('cxx') }}
     - python >3               # [not osx]
-  host:
+    - patch       # [not win]
+    - m2-patch    # [win]
+   host:
     - clangdev {{ version }}  # [not osx]
     - llvmdev {{ version }}   # [not osx]
 
