@@ -29,7 +29,7 @@ requirements:
     - python >3               # [not osx]
     - patch       # [not win]
     - m2-patch    # [win]
-   host:
+  host:
     - clangdev {{ version }}  # [not osx]
     - llvmdev {{ version }}   # [not osx]
 
