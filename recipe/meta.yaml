@@ -33,6 +33,8 @@ requirements:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - python                  # [not osx]
+    - patch                   # [unix]
+    - m2-patch                # [win]
   host:
     - clangdev {{ version }}  # [not osx]
     - llvmdev {{ version }}   # [not osx]
