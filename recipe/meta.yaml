@@ -60,6 +60,7 @@ outputs:
       build:
         - {{ compiler('cxx') }}
       host:
+        - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
     test:
