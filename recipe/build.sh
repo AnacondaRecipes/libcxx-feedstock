@@ -15,7 +15,7 @@ export PATH="$LLVM_PREFIX/bin:$PATH"
 
 if [[ "$target_platform" != osx-* ]]; then
     # build libcxx first
-    mkdir build
+    mkdir -p build
     cd build
 
     cmake \
@@ -32,7 +32,7 @@ if [[ "$target_platform" != osx-* ]]; then
 
     # now build libcxxabi
     cd libcxxabi
-    mkdir build && cd build
+    mkdir -p build && cd build
 
     cmake \
       -DCMAKE_INSTALL_PREFIX=$PREFIX \
@@ -66,6 +66,11 @@ if [[ "$target_platform" != osx-* ]]; then
     make install
 
     cd ..
+    pushd "$PREFIX/lib"
+    ls -la
+    rm -f libc++abi.so
+    ln -s libc++abi.1.0.so libc++abi.so
+    popd
 else
     mkdir build
     cd build
