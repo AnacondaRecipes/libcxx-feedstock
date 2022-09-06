@@ -1,14 +1,17 @@
-commit a1ca3225214d28d038d6f5a3c93b87184ac0080f (HEAD)
-Author: Isuru Fernando <isuruf@gmail.com>
-Date:   Tue May 18 19:51:28 2021 -0500
+From e02e436ece48dab41f2f1337c25e0ca309b4697e Mon Sep 17 00:00:00 2001
+From: Isuru Fernando <isuruf@gmail.com>
+Date: Tue, 18 May 2021 19:51:28 -0500
+Subject: [PATCH 2/4] Support legacy standalone builds
 
-    Support legacy standalone builds
+---
+ libcxx/src/CMakeLists.txt | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
 
 diff --git a/libcxx/src/CMakeLists.txt b/libcxx/src/CMakeLists.txt
-index 87b71f7ba334..c3a788f3de6a 100644
+index 12dcdf954405..d2c33141c77b 100644
 --- a/libcxx/src/CMakeLists.txt
 +++ b/libcxx/src/CMakeLists.txt
-@@ -242,6 +242,23 @@ if (LIBCXX_ENABLE_SHARED)
+@@ -265,6 +265,23 @@ if (LIBCXX_ENABLE_SHARED)
        "-Wl,-force_symbols_weak_list,${CMAKE_CURRENT_SOURCE_DIR}/../lib/weak.exp")
  
      target_link_libraries(cxx_shared PRIVATE $<TARGET_NAME_IF_EXISTS:cxxabi-reexports>)
@@ -32,3 +35,6 @@ index 87b71f7ba334..c3a788f3de6a 100644
    endif()
  
    # Generate a linker script in place of a libc++.so symlink.
+-- 
+2.35.1.windows.2
+

@@ -1,5 +1,6 @@
-LLVM_PREFIX=$PREFIX
+set -ex
 
+LLVM_PREFIX=$PREFIX
 
 if [[ "$target_platform" == osx-* ]]; then
     export CFLAGS="$CFLAGS -isysroot $CONDA_BUILD_SYSROOT"
@@ -22,6 +23,7 @@ if [[ "$target_platform" != osx-* ]]; then
       -DCMAKE_BUILD_TYPE=Release \
       -DLLVM_INCLUDE_TESTS=OFF \
       -DLLVM_INCLUDE_DOCS=OFF \
+      -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
       ../libcxx
 
     make -j${CPU_COUNT} VERBOSE=1
@@ -36,9 +38,8 @@ if [[ "$target_platform" != osx-* ]]; then
       -DCMAKE_INSTALL_PREFIX=$PREFIX \
       -DCMAKE_BUILD_TYPE=Release \
       -DLIBCXXABI_LIBCXX_PATH=$SRC_DIR/libcxx \
-      -DLIBCXXABI_LIBCXX_INCLUDES=$SRC_DIR/libcxx/include \
+      -DLIBCXXABI_LIBCXX_INCLUDES=$PREFIX/include/c++/v1 \
       -DLLVM_INCLUDE_TESTS=OFF \
-      -DLLVM_INCLUDE_DOCS=OFF \
       ..
 
     make -j${CPU_COUNT} VERBOSE=1
@@ -52,11 +53,13 @@ if [[ "$target_platform" != osx-* ]]; then
     cmake \
       -DCMAKE_INSTALL_PREFIX=$PREFIX \
       -DCMAKE_BUILD_TYPE=Release \
+      -DLIBCXX_INSTALL_HEADERS=ON \
       -DLIBCXX_CXX_ABI=libcxxabi \
       -DLIBCXX_CXX_ABI_INCLUDE_PATHS=$SRC_DIR/libcxxabi/include \
       -DLIBCXX_CXX_ABI_LIBRARY_PATH=$PREFIX/lib \
       -DLLVM_INCLUDE_TESTS=OFF \
       -DLLVM_INCLUDE_DOCS=OFF \
+      -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
       ../libcxx
 
     make -j${CPU_COUNT} VERBOSE=1
@@ -67,10 +70,6 @@ else
     mkdir build
     cd build
 
-    # -DCMAKE_C_FLAGS=-mlinker-version=305 \
-    # -DCMAKE_CXX_FLAGS=-mlinker-version=305 \
-    # LDFLAGS="${LDFLAGS} -mlinker-version=305"
-
     # on osx we point libc++ to the system libc++abi
     cmake \
       -DCMAKE_INSTALL_PREFIX=$PREFIX \
@@ -78,10 +77,11 @@ else
       -DLIBCXX_CXX_ABI=libcxxabi \
       -DLIBCXX_CXX_ABI_INCLUDE_PATHS=${CONDA_BUILD_SYSROOT}/usr/include \
       -DLIBCXX_CXX_ABI_LIBRARY_PATH=${CONDA_BUILD_SYSROOT}/usr/lib \
-      -DCMAKE_OSX_SYSROOT=${CONDA_BUILD_SYSROOT} \
+      -DCMAKE_OSX_SYSROOT=$CONDA_BUILD_SYSROOT \
       -DLLVM_INCLUDE_TESTS=OFF \
       -DLLVM_INCLUDE_DOCS=OFF \
       -DLIBCXX_ENABLE_NEW_DELETE_DEFINITIONS=ON \
+      -DLIBCXX_ENABLE_VENDOR_AVAILABILITY_ANNOTATIONS=ON \
       ../libcxx
 
     make -j${CPU_COUNT} VERBOSE=1
@@ -92,4 +92,3 @@ else
 
     cd ..
 fi
-
