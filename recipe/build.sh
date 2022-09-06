@@ -67,6 +67,7 @@ if [[ "$target_platform" != osx-* ]]; then
 
     cd ..
     pushd "$PREFIX/lib"
+    ls -la libc*
     rm -f libc++abi.so
     ln -s libc++abi.so.1.0 libc++abi.so
     popd
