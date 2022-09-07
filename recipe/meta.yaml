@@ -17,7 +17,6 @@ source:
 build:
   number: 0
   skip: true  # [win]
-  # skip: true  # [ppc64le or aarch64]
   skip: True  # [linux and s390x]
   skip: True  # [py<30]
 
