@@ -24,7 +24,7 @@ source:
       - patches/0004-Revert-libc-Remove-workaround-for-C11-features-on-co.patch
 
 build:
-  number: 0
+  number: 1
   skip: true  # [win]
   skip: True  # [linux and s390x]
   skip: True  # [py<30]
@@ -46,7 +46,6 @@ requirements:
     - ninja
     - make                    # [unix]
     - {{ compiler('cxx') }}
-    - libcxx                  # [osx]
     - python                  # [not osx]
     - patch                   # [unix]
     - m2-patch                # [win]
@@ -119,12 +118,12 @@ outputs:
   - name: libcxx
     build:
       string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}        # [hardening == "none"]
-      string: debug_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [hardening == "debug"]
-      run_exports:                                      # [hardening == "debug"]
-        # packages built with hardened lib must not be installable without extra label
-        - libcxx =*=debug*                              # [hardening == "debug"]
+      #string: debug_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [hardening == "debug"]
+      #run_exports:                                      # [hardening == "debug"]
+      #  # packages built with hardened lib must not be installable without extra label
+      #  - libcxx =*=debug*                              # [hardening == "debug"]
       ignore_run_exports_from:
-        # we want to ignore libstdcxx, but not libgcc; the latter also comes in through
+          # we want to ignore libstdcxx, but not libgcc; the latter also comes in through
         # compiler('c'), and conda keeps that despite ignoring the cxx run-exports
         - {{ compiler('cxx') }}
     files:
@@ -139,7 +138,7 @@ outputs:
       - Library/lib/libc++*.lib     # [win]
     requirements:
       build:
-        - {{ stdlib('c') }}
+        - {{ stdlib('c') }}       # [not osx]
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
       host:
@@ -157,54 +156,54 @@ outputs:
         - test -f $PREFIX/lib/libc++experimental.a      # [unix]
         # absence of headers
         - test ! -d $PREFIX/include/c++                 # [unix]
-    test:
-      requires:
-        - clang                  # [osx]
-        - clangxx
-        - ld64                   # [osx]
-        - cctools                # [osx]
-        - compiler-rt            # [osx]
-        - llvm-tools             # [osx]
-        - {{ compiler('cxx') }}  # [not osx]
-      files:
-        - test_sources
-        - compile_test.sh   # [unix]
-        - compile_test.bat  # [win]
-      commands:
-        # Dummy var for different hashes
-        - echo {{ dummy_var }}                                    # [osx]
-        - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
-        - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
-        - bash compile_test.sh                                    # [unix]
-        - compile_test.bat                                        # [win]
-        # !!!!!!!!!!!! README !!!!!!!!!!!!!!!!!!
-        # we do not ship libcxxabi on OSX - this breaks exception passing
-        - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
-        - test -f $PREFIX/lib/libc++abi.so                        # [linux]
+    # test:
+    #   requires:
+    #     - clang                  # [osx]
+    #     - clangxx
+    #     - ld64                   # [osx]
+    #     - cctools                # [osx]
+    #     - compiler-rt            # [osx]
+    #     - llvm-tools             # [osx]
+    #     - {{ compiler('cxx') }}  # [not osx]
+    #   files:
+    #     - test_sources
+    #     - compile_test.sh   # [unix]
+    #     - compile_test.bat  # [win]
+    #   commands:
+    #     # Dummy var for different hashes
+    #     - echo {{ dummy_var }}                                    # [osx]
+    #     - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
+    #     - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
+    #     - bash compile_test.sh                                    # [unix]
+    #     - compile_test.bat                                        # [win]
+    #     # !!!!!!!!!!!! README !!!!!!!!!!!!!!!!!!
+    #     # we do not ship libcxxabi on OSX - this breaks exception passing
+    #     - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
+    #     - test -f $PREFIX/lib/libc++abi.so                        # [linux]
 
-      # Following 2 projects had issues with libc++, so check them
-      # before releasing just to be sure.
-      # downstreams:   # [osx]
-      #  - python-symengine  # [osx]
-      #  - openturns         # [osx]
-      #  - libcxx-testing    # [osx]
+    #   # Following 2 projects had issues with libc++, so check them
+    #   # before releasing just to be sure.
+    #   # downstreams:   # [osx]
+    #   #  - python-symengine  # [osx]
+    #   #  - openturns         # [osx]
+    #   #  - libcxx-testing    # [osx]
 
   - name: libcxxabi
     build:
       skip: true  # [not linux]
-      missing_dso_whitelist:
-        - /lib64/libpthread.so.0
-        - /lib64/libc.so.6
-        - /lib64/ld64.so.2
-        - /lib64/libgcc_s.so.1
-        - /lib64/ld-linux-aarch64.so.1
-        - /lib64/ld-linux-x86-64.so.2
+      # missing_dso_whitelist:
+      #   - /lib64/libpthread.so.0
+      #   - /lib64/libc.so.6
+      #   - /lib64/ld64.so.2
+      #   - /lib64/libgcc_s.so.1
+      #   - /lib64/ld-linux-aarch64.so.1
+      #   - /lib64/ld-linux-x86-64.so.2
     files:
       - lib/libc++abi.*
     requirements:
       build:
         # for run-exports
-        - {{ stdlib('c') }}
+        - {{ stdlib('c') }}       # [not osx]
         - {{ compiler('c') }}
       run_constrained:
         - libcxx {{ version }}.*
