@@ -1,2 +1,9 @@
-channels:
-  - https://staging.continuum.io/prefect/fs/clangdev-feedstock/pr4/b5c20c8
+# the conda build parameters to use
+build_parameters:
+  - "--suppress-variables"
+  - "--error-overlinking"
+  # TODO: Fix overlinking issue with defaults/win-64::vs2015_runtime==14.42.34433=he0abc0d_4
+
+upload_without_merge: True
+upload_to_staging_channel_in_pr: True
+channels: [ llvmdev17 ]
