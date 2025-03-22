@@ -54,70 +54,6 @@ requirements:
     - llvmdev {{ version }}   # [not osx]
 
 outputs:
-  - name: libcxx-devel
-    files:
-      - include/c++                 # [unix]
-      - Library/include/c++         # [win]
-    requirements:
-      build:
-        - {{ compiler('cxx') }}
-      host:
-        - {{ pin_subpackage("libcxx", exact=True) }}
-      run:
-        - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
-
-      run_constrained:
-        - __osx <12                                        # [osx and (sys_abi == "pre-12")]
-        - sysroot_{{ target_platform }} >={{ c_stdlib_version }}    # [linux]
-
-    # package for old sys_abi is not installable on macOS-12 image anymore
-    test:
-      requires:
-        - clang                  # [osx]
-        - clangxx
-        - ld64                   # [osx]
-        - cctools                # [osx]
-        - llvm-tools             # [osx]
-        - {{ compiler('cxx') }}  # [not osx]
-      files:
-        - test_sources
-        - compile_test.sh   # [unix]
-        - compile_test.bat  # [win]
-      commands:
-        # Dummy var for different hashes
-        - echo {{ dummy_var }}                                    # [osx]
-        - echo {{ sys_abi }}                                      # [osx]
-        - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
-        - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
-        - bash compile_test.sh                                    # [unix]
-        - compile_test.bat                                        # [win]
-        # make sure we inserted link to our docs wherever it is necessary;
-        # i.e. everywhere there's a string "availability(macos,...,introduced=<ver>)" for osx version >10.13;
-        # 'grep -v' inverts the match but returns non-zero exit code if no lines are returned; so we use 'wc -l';
-        # we want to have zero lines that don't either: contain our link or are for <=10.13 (lowest occurring in that file is 10.9)
-        - if [ 0 -eq $(cat ${PREFIX}/include/c++/v1/__availability | grep "availability(macos" | grep -vE "(conda-forge|10.9|10.1[0-3])" | wc -l) ]; then exit 0; else exit 1; fi  # [osx]
-        # !!!!!!!!!!!! README !!!!!!!!!!!!!!!!!!
-        # we do not ship libcxxabi on OSX - this breaks exception passing
-        - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
-        - test -f $PREFIX/lib/libc++abi.so                        # [linux]
-
-      # Following 2 projects had issues with libc++, so check them
-      # before releasing just to be sure.
-      downstreams:              # [osx]
-        - python-symengine      # [osx]
-        - openturns             # [osx]
-        # test current libcxx against old clang builds;
-        # version correspondence is 0.{{ CLANG_MAJOR }}.{{ LIBCXX_MAJOR }}
-        # these tests are unusual in that they use -Wl,-rpath, but not -L.
-        - libcxx-testing 0.17.{{ major }}   # [osx]
-        - libcxx-testing 0.16.{{ major }}   # [osx]
-        - libcxx-testing 0.15.{{ major }}   # [osx]
-        - libcxx-testing 0.14.{{ major }}   # [osx]
-        - libcxx-testing 0.13.{{ major }}   # [osx]
-        - libcxx-testing 0.12.{{ major }}   # [osx]
-        - libcxx-testing 0.11.{{ major }}   # [osx]
-    {% endif %}
-
   - name: libcxx
     build:
       string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}        # [hardening == "none"]
@@ -141,15 +77,12 @@ outputs:
       - Library/lib/libc++*.lib     # [win]
     requirements:
       build:
-        - {{ stdlib('c') }}       # [not osx]
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
       host:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
-      run_constrained:
-        - sysroot_{{ target_platform }} >={{ c_stdlib_version }}    # [linux]
     test:
       commands:
         # presence of shared & static libraries
@@ -159,37 +92,6 @@ outputs:
         - test -f $PREFIX/lib/libc++experimental.a      # [unix]
         # absence of headers
         - test ! -d $PREFIX/include/c++                 # [unix]
-    test:
-      requires:
-        - clang                  # [osx]
-        - clangxx
-        - ld64                   # [osx]
-        - cctools                # [osx]
-        - compiler-rt            # [osx]
-        - llvm-tools             # [osx]
-        - {{ compiler('cxx') }}  # [not osx]
-      files:
-        - test_sources
-        - compile_test.sh   # [unix]
-        - compile_test.bat  # [win]
-      commands:
-        # Dummy var for different hashes
-        - echo {{ dummy_var }}                                    # [osx]
-        - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
-        - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
-        - bash compile_test.sh                                    # [unix]
-        - compile_test.bat                                        # [win]
-        # !!!!!!!!!!!! README !!!!!!!!!!!!!!!!!!
-        # we do not ship libcxxabi on OSX - this breaks exception passing
-        - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
-        - test -f $PREFIX/lib/libc++abi.so                        # [linux]
-
-      # Following 2 projects had issues with libc++, so check them
-      # before releasing just to be sure.
-      # downstreams:   # [osx]
-      #  - python-symengine  # [osx]
-      #  - openturns         # [osx]
-      #  - libcxx-testing    # [osx]
 
   - name: libcxxabi
     build:
@@ -205,14 +107,8 @@ outputs:
       - lib/libc++abi.*
     requirements:
       build:
-        # for run-exports
-        - {{ stdlib('c') }}       # [not osx]
         - {{ compiler('c') }}
       run_constrained:
-        - libcxx {{ version }}.*
-    test:
-      commands:
-        - test -f $PREFIX/lib/libc++abi.so  # [linux]
         - libcxx {{ version }}.*
     test:
       commands:
@@ -235,7 +131,5 @@ extra:
     - isuruf
     - beckermr
     - timsnyder
-    - h-vetinari
-  feedstock-name: libcxx
     - h-vetinari
   feedstock-name: libcxx
