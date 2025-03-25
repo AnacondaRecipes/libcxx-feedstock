@@ -46,6 +46,7 @@ requirements:
     - ninja
     - make                    # [unix]
     - {{ compiler('cxx') }}
+    - {{ compiler('c') }}
     - python                  # [not osx]
     - patch                   # [unix]
     - m2-patch                # [win]
@@ -124,6 +125,10 @@ about:
   doc_url: https://libcxx.llvm.org/
 
 extra:
+  skip-lints:
+    # there are false positives for these checks,
+    # for some of the individual outputs.
+    - missing_tests
   recipe-maintainers:
     - SylvainCorlay
     - inducer

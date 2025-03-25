@@ -5,9 +5,8 @@ LLVM_PREFIX=$PREFIX
 if [[ "$target_platform" == osx-* ]]; then
     export CFLAGS="$CFLAGS -isysroot $CONDA_BUILD_SYSROOT"
     export CXXFLAGS="$CXXFLAGS -isysroot $CONDA_BUILD_SYSROOT"
-    export LDFLAGS="$LDFLAGS -isysroot $CONDA_BUILD_SYSROOT -framework CoreFoundation"
+    export LDFLAGS="$LDFLAGS -isysroot $CONDA_BUILD_SYSROOT"
     export INSTALL_NAME_TOOL="/usr/bin/install_name_tool"
-    export CMAKE_EXTRA_ARGS="-DCMAKE_OSX_SYSROOT=$CONDA_BUILD_SYSROOT -DLIBCXX_ENABLE_VENDOR_AVAILABILITY_ANNOTATIONS=ON"
 fi
 
 export CFLAGS="$CFLAGS -I$LLVM_PREFIX/include -I$BUILD_PREFIX/include"
@@ -26,6 +25,7 @@ cmake -G Ninja \
     -DLIBCXX_INCLUDE_DOCS=OFF \
     -DLIBCXX_INCLUDE_TESTS=OFF \
     -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
+    -DCMAKE_CXX_STANDARD=20 \
     $CMAKE_ARGS \
     $CMAKE_EXTRA_ARGS
 

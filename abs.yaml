@@ -4,7 +4,7 @@ build_parameters:
   - "--error-overlinking"
   # TODO: Fix overlinking issue with defaults/win-64::vs2015_runtime==14.42.34433=he0abc0d_4
 
-aggregate_check: false
+aggregate_check: true
 
 upload_without_merge: True
 upload_to_staging_channel_in_pr: True
