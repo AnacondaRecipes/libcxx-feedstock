@@ -1,5 +1,6 @@
 set -xe
 
+<<<<<<< HEAD
 if [[ $(uname) == Darwin ]]; then
   export CONDA_BUILD_SYSROOT_TEMP="-isysroot $(xcrun --show-sdk-path)"
 else
@@ -10,6 +11,12 @@ export PATH=$PREFIX/bin:$PATH
 LINK_FLAGS=" $CONDA_BUILD_SYSROOT_TEMP -Wl,-rpath,$PREFIX/lib -L$PREFIX/lib -Wl,-v -v"
 
 if [[ $(uname) == Darwin ]]; then
+=======
+LINK_FLAGS="-Wl,-rpath,$PREFIX/lib -L$PREFIX/lib -Wl,-v -v"
+
+# target platform is empty here now
+if [[ "$target_platform" == osx* ]]; then
+>>>>>>> forge/17.x
     llvm-nm $PREFIX/lib/libc++.1.dylib
 else
     LINK_FLAGS="${LINK_FLAGS} -lc++abi"

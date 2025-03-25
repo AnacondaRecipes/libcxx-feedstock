@@ -1,4 +1,13 @@
+<<<<<<< HEAD
 {% set version = "14.0.6" %}
+=======
+{% set version = "17.0.6" %}
+{% set major = version.split(".")[0] %}
+
+{% if sys_abi is undefined %}
+{% set sys_abi = "dummy" %}
+{% endif %}
+>>>>>>> forge/17.x
 
 package:
   name: libcxx_and_libcxxabi
@@ -6,6 +15,7 @@ package:
 
 source:
   - url: https://github.com/llvm/llvm-project/releases/download/llvmorg-{{ version.replace(".rc", "-rc") }}/llvm-project-{{ version.replace(".rc", "rc") }}.src.tar.xz
+<<<<<<< HEAD
     sha256: 8b3cfd7bc695bd6cea0f37f53f0981f34f87496e79e2529874fd03a2f9dd3a8a
     patches:
       - patches/0001-libcxxabi-10.9-compatibility.patch  # [osx and x86_64]
@@ -30,23 +40,53 @@ build:
     - /lib64/libgcc_s.so.1    # [linux]
     - /lib64/ld-linux-aarch64.so.1  # [linux]
     - /lib64/ld-linux-x86-64.so.2   # [linux]
+=======
+    sha256: 58a8818c60e6627064f312dbf46c02d9949956558340938b71cf731ad8bc0813
+    patches:
+      - patches/0001-Support-legacy-standalone-builds.patch
+      # See https://discourse.llvm.org/t/shipping-custom-libc-on-macos/58606
+      - patches/0002-Fix-ABI-compatibility-with-system.patch    # [sys_abi == "pre-12"]
+      - patches/0003-custom-error-message-for-old-sdk.patch
+      # upstream removed fallbacks in case the underlying libc didn't support C11 in
+      # https://github.com/llvm/llvm-project/commit/21f73d5826fb5024a27eaacafadfa316f58949c5;
+      # using new libcxx with old clang versions (beyond what upstream supports) relies on
+      # having these fallbacks in place. Drop if conflict-resolution becomes too messy.
+      - patches/0004-Revert-libc-Remove-workaround-for-C11-features-on-co.patch
+
+build:
+  number: 6
+  skip: true  # [win]
+  skip: true  # [ppc64le or aarch64]
+
+# use selectors here so smithy breaks up CI jobs
+# [sys_abi]
+>>>>>>> forge/17.x
 
 requirements:
   build:
     - cmake
+<<<<<<< HEAD
     - make                    # [unix]
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - python                  # [not osx]
     - patch                   # [unix]
     - m2-patch                # [win]
+=======
+    - ninja
+    - {{ compiler('cxx') }}
+    - {{ compiler('c') }}
+    - {{ stdlib('c') }}
+    - python >3               # [not osx]
+>>>>>>> forge/17.x
   host:
     - clangdev {{ version }}  # [not osx]
     - llvmdev {{ version }}   # [not osx]
 
 outputs:
-  - name: libcxx
+  - name: libcxx-devel
     files:
+<<<<<<< HEAD
       - include/c++
       - Library/include/c++
       - lib/libc++.*
@@ -57,11 +97,98 @@ outputs:
       - Library/lib/libc++*.lib
     requirements:
       build:
+=======
+      - include/c++                 # [unix]
+      - Library/include/c++         # [win]
+    requirements:
+      host:
+        - {{ pin_subpackage("libcxx", exact=True) }}
+      run:
+        - {{ pin_subpackage("libcxx", max_pin=None) }}
+      run_constrained:
+        - __osx <12     # [osx and (sys_abi == "pre-12")]
+
+    # package for old sys_abi is not installable on macOS-12 image anymore
+    {% if sys_abi != "pre-12" %}
+    test:
+      requires:
+        - clang                  # [osx]
+        - clangxx
+        - ld64                   # [osx]
+        - cctools                # [osx]
+        - llvm-tools             # [osx]
+        - {{ compiler('cxx') }}  # [not osx]
+      files:
+        - test_sources
+        - compile_test.sh   # [unix]
+        - compile_test.bat  # [win]
+      commands:
+        # Dummy var for different hashes
+        - echo {{ dummy_var }}                                    # [osx]
+        - echo {{ sys_abi }}                                      # [osx]
+        - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
+        - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
+        - bash compile_test.sh                                    # [unix]
+        - compile_test.bat                                        # [win]
+        # make sure we inserted link to our docs wherever it is necessary;
+        # i.e. everywhere there's a string "availability(macos,...,introduced=<ver>)" for osx version >10.13;
+        # 'grep -v' inverts the match but returns non-zero exit code if no lines are returned; so we use 'wc -l';
+        # we want to have zero lines that don't either: contain our link or are for <=10.13 (lowest occurring in that file is 10.9)
+        - if [ 0 -eq $(cat ${PREFIX}/include/c++/v1/__availability | grep "availability(macos" | grep -vE "(conda-forge|10.9|10.1[0-3])" | wc -l) ]; then exit 0; else exit 1; fi  # [osx]
+        # !!!!!!!!!!!! README !!!!!!!!!!!!!!!!!!
+        # we do not ship libcxxabi on OSX - this breaks exception passing
+        - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
+        - test -f $PREFIX/lib/libc++abi.so                        # [linux]
+
+      # Following 2 projects had issues with libc++, so check them
+      # before releasing just to be sure.
+      downstreams:              # [osx]
+        - python-symengine      # [osx]
+        - openturns             # [osx]
+        # test current libcxx against old clang builds;
+        # version correspondence is 0.{{ CLANG_MAJOR }}.{{ LIBCXX_MAJOR }}
+        # these tests are unusual in that they use -Wl,-rpath, but not -L.
+        - libcxx-testing 0.17.{{ major }}   # [osx]
+        - libcxx-testing 0.16.{{ major }}   # [osx]
+        - libcxx-testing 0.15.{{ major }}   # [osx]
+        - libcxx-testing 0.14.{{ major }}   # [osx]
+        - libcxx-testing 0.13.{{ major }}   # [osx]
+        - libcxx-testing 0.12.{{ major }}   # [osx]
+        - libcxx-testing 0.11.{{ major }}   # [osx]
+    {% endif %}
+
+  - name: libcxx
+    build:
+      string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}        # [hardening == "none"]
+      string: debug_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [hardening == "debug"]
+      run_exports:                                      # [hardening == "debug"]
+        # packages built with hardened lib must not be installable without extra label
+        - libcxx =*=debug*                              # [hardening == "debug"]
+      ignore_run_exports_from:
+        # we want to ignore libstdcxx, but not libgcc; the latter also comes in through
+        # compiler('c'), and conda keeps that despite ignoring the cxx run-exports
+        - {{ compiler('cxx') }}
+    files:
+      - lib/libc++.so               # [linux]
+      - lib/libc++.so.*             # [linux]
+      - lib/libc++.dylib            # [osx]
+      - lib/libc++.*.dylib          # [osx]
+      - Library/bin/c++*.dll        # [win]
+      - lib/libc++.a                # [unix]
+      - lib/libc++experimental.*    # [unix]
+      - Library/lib/c++*.lib        # [win]
+      - Library/lib/libc++*.lib     # [win]
+    requirements:
+      build:
+        - {{ stdlib('c') }}
+        - {{ compiler('c') }}
+>>>>>>> forge/17.x
         - {{ compiler('cxx') }}
       host:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
+<<<<<<< HEAD
     test:
       requires:
         - clang                  # [osx]
@@ -93,6 +220,19 @@ outputs:
       #  - python-symengine  # [osx]
       #  - openturns         # [osx]
       #  - libcxx-testing    # [osx]
+=======
+      run_constrained:
+        - sysroot_{{ target_platform }} >={{ c_stdlib_version }}    # [linux]
+    test:
+      commands:
+        # presence of shared & static libraries
+        - test -f $PREFIX/lib/libc++.so                 # [linux]
+        - test -f $PREFIX/lib/libc++.dylib              # [osx]
+        - test -f $PREFIX/lib/libc++.a                  # [unix]
+        - test -f $PREFIX/lib/libc++experimental.a      # [unix]
+        # absence of headers
+        - test ! -d $PREFIX/include/c++                 # [unix]
+>>>>>>> forge/17.x
 
   - name: libcxxabi
     build:
@@ -107,6 +247,10 @@ outputs:
     files:
       - lib/libc++abi.*
     requirements:
+      build:
+        # for run-exports
+        - {{ stdlib('c') }}
+        - {{ compiler('c') }}
       run_constrained:
         - libcxx {{ version }}.*
     test:
@@ -114,13 +258,20 @@ outputs:
         - test -f $PREFIX/lib/libc++abi.so  # [linux]
 
 about:
+<<<<<<< HEAD
   home: https://libcxx.llvm.org/
+=======
+  home: http://libcxx.llvm.org/
+>>>>>>> forge/17.x
   license: Apache-2.0 WITH LLVM-exception
   license_file: libcxx/LICENSE.TXT
   license_family: Apache
   summary: LLVM C++ standard library
   dev_url: https://github.com/llvm/llvm-project
+<<<<<<< HEAD
   doc_url: https://libcxx.llvm.org/
+=======
+>>>>>>> forge/17.x
 
 extra:
   recipe-maintainers:
