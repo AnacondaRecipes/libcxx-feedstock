@@ -29,6 +29,16 @@ cmake -G Ninja \
     $CMAKE_ARGS \
     $CMAKE_EXTRA_ARGS
 
+# For reference, this is how to build a bootstrap version, we might want to do this in a later 
+# and/or reorganize these somehow with clangdev, compiler-rt, llvmdev, etc.
+# https://libcxx.llvm.org/VendorDocumentation.html#the-bootstrapping-build
+# $ cmake -G Ninja -S llvm -B build -DLLVM_ENABLE_PROJECTS="clang"                      \  # Configure
+#                                   -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
+#                                   -DLLVM_RUNTIME_TARGETS="<target-triple>"
+# $ ninja -C build runtimes                                                                # Build
+# $ ninja -C build check-runtimes                                                          # Test
+# $ ninja -C build install-runtimes                                                        # Install
+
 # Build
 ninja -C build cxx cxxabi unwind
 
