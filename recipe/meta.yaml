@@ -33,17 +33,16 @@ build:
   # osx only and revisit the retooling as its own effort or as part of a future update.
   skip: true  # [not osx]
 
-  ### Forcing Failure
-  # ignore_run_exports:
-  #   - libstdcxx-ng
-  # missing_dso_whitelist:
-  #   - /usr/lib/libc++abi.dylib
-  #   - /lib64/libpthread.so.0  # [linux]
-  #   - /lib64/libc.so.6        # [linux]
-  #   - /lib64/ld64.so.2        # [linux]
-  #   - /lib64/libgcc_s.so.1    # [linux]
-  #   - /lib64/ld-linux-aarch64.so.1  # [linux]
-  #   - /lib64/ld-linux-x86-64.so.2   # [linux]
+  ignore_run_exports:
+    - libstdcxx-ng
+  missing_dso_whitelist:
+    - /usr/lib/libc++abi.dylib
+    - /lib64/libpthread.so.0  # [linux]
+    - /lib64/libc.so.6        # [linux]
+    - /lib64/ld64.so.2        # [linux]
+    - /lib64/libgcc_s.so.1    # [linux]
+    - /lib64/ld-linux-aarch64.so.1  # [linux]
+    - /lib64/ld-linux-x86-64.so.2   # [linux]
 
 requirements:
   build:
@@ -102,15 +101,14 @@ outputs:
 
   - name: libcxxabi
     build:
-      skip: true
       # skip: true  # [not linux]
-      # missing_dso_whitelist:
-      #   - /lib64/libpthread.so.0
-      #   - /lib64/libc.so.6
-      #   - /lib64/ld64.so.2
-      #   - /lib64/libgcc_s.so.1
-      #   - /lib64/ld-linux-aarch64.so.1
-      #   - /lib64/ld-linux-x86-64.so.2
+      missing_dso_whitelist:
+        - /lib64/libpthread.so.0
+        - /lib64/libc.so.6
+        - /lib64/ld64.so.2
+        - /lib64/libgcc_s.so.1
+        - /lib64/ld-linux-aarch64.so.1
+        - /lib64/ld-linux-x86-64.so.2
     files:
       - lib/libc++abi.*
     requirements:
@@ -136,6 +134,7 @@ extra:
     # there are false positives for these checks,
     # for some of the individual outputs.
     - missing_tests
+    - should_use_compilers
   recipe-maintainers:
     - SylvainCorlay
     - inducer
