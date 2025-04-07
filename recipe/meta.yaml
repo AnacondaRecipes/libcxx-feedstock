@@ -94,6 +94,7 @@ outputs:
         # presence of shared & static libraries
         - test -f $PREFIX/lib/libc++.so                 # [linux]
         - test -f $PREFIX/lib/libc++.dylib              # [osx]
+        - test -f $PREFIX/lib/libc++.1.0.dylib
         - test -f $PREFIX/lib/libc++.a                  # [unix]
         - test -f $PREFIX/lib/libc++experimental.a      # [unix]
         # absence of headers

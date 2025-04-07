@@ -3,12 +3,16 @@ c_compiler:           # [osx]
 cxx_compiler:         # [osx]
   - clang_bootstrap   # [osx]
 
-c_compiler_version:     # [linux]
+c_compiler_version:
   - 11.2.0              # [linux]
-cxx_compiler_version:   # [linux]
+  - 17.0.6              # [osx]
+cxx_compiler_version:
   - 11.2.0              # [linux]
+  - 17.0.6              # [osx]
 
 dummy_var:              # [osx]
   - 0                   # [osx and x86_64]
   - 1                   # [osx and arm64]
- 
+
+CONDA_BUILD_SYSROOT:
+  - /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk
