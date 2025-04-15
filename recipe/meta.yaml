@@ -67,6 +67,7 @@ outputs:
       run_exports:                                      # [hardening == "debug"]
         # packages built with hardened lib must not be installable without extra label
         - libcxx =*=debug*                              # [hardening == "debug"]
+        - libcxx                                        # [hardening == "none"]
       ignore_run_exports_from:
         # we want to ignore libstdcxx, but not libgcc; the latter also comes in through
         # compiler('c'), and conda keeps that despite ignoring the cxx run-exports
