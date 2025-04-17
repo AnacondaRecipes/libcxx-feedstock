@@ -5,10 +5,10 @@ cxx_compiler:         # [osx]
 
 c_compiler_version:
   - 11.2.0              # [linux]
-  - 17.0.6              # [osx]
+  - 17                  # [osx]
 cxx_compiler_version:
   - 11.2.0              # [linux]
-  - 17.0.6              # [osx]
+  - 17                  # [osx]
 
 dummy_var:              # [osx]
   - 0                   # [osx and x86_64]
@@ -16,6 +16,6 @@ dummy_var:              # [osx]
 
 # if you don't have the same version of the SDK,
 # substitute for something > 12 for local development
-CONDA_BUILD_SYSROOT:
-  - /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk
+# CONDA_BUILD_SYSROOT:
+#   - /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk
   # - /Library/Developer/CommandLineTools/SDKs/MacOSX14.5.sdk
