@@ -14,5 +14,8 @@ dummy_var:              # [osx]
   - 0                   # [osx and x86_64]
   - 1                   # [osx and arm64]
 
+# if you don't have the same version of the SDK,
+# substitute for something > 12 for local development
 CONDA_BUILD_SYSROOT:
   - /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk
+  # - /Library/Developer/CommandLineTools/SDKs/MacOSX14.5.sdk
