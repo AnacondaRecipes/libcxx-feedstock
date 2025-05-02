@@ -6,10 +6,10 @@ cxx_compiler:         # [osx]
 # libcxx only supports the last released GCC version, see
 # https://libcxx.llvm.org/index.html#platform-and-compiler-support
 c_compiler_version:
-  - 12                  # [linux]
+  - 11.2                # [linux]
   - 17                  # [osx]
 cxx_compiler_version:
-  - 12                  # [linux]
+  - 11.2                # [linux]
   - 17                  # [osx]
 
 dummy_var:              # [osx]
