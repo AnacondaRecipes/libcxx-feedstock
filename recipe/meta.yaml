@@ -5,6 +5,9 @@
 {% set sys_abi = "dummy" %}
 {% endif %}
 
+{% set bootstrap_version = "14" %}
+
+
 package:
   name: libcxx_and_libcxxabi
   version: {{ version }}
@@ -26,7 +29,9 @@ source:
 build:
   number: 0
   skip: true  # [win]
-
+  # I don't believe we can build this on linux with the sysroot we have
+  skip: true  # [linux]
+  
   #TODO: does this even come in?
   ignore_run_exports:
     - libstdcxx-ng
@@ -51,8 +56,8 @@ requirements:
     - m2-patch                # [win]
     - llvm
   host:
-    - clangdev {{ version }}  # [not osx]
-    - llvm {{ version }}      # [not osx]
+    - clangdev {{ bootstrap_version }}  # [not osx]
+    - llvm {{ bootstrap_version }}      # [not osx]
 
 outputs:
 
