@@ -141,6 +141,7 @@ outputs:
     test:
       commands:
         - test -f $PREFIX/lib/libc++abi.so  # [linux]
+        - test -f $PREFIX/lib/libc++.dylib  # [osx]
 
 about:
   home: https://libcxx.llvm.org/
@@ -148,14 +149,18 @@ about:
   license_file: libcxx/LICENSE.TXT
   license_family: Apache
   summary: LLVM C++ standard library
+  description: |
+    libc++ is an implementation of the C++ standard library developed by the LLVM project. 
+    It supports C++11, C++14, C++17, and parts of C++20. 
+    This package also includes libc++abi, which provides the low-level runtime support needed 
+    by libc++, including exception handling and other ABI-related features.
   dev_url: https://github.com/llvm/llvm-project
   doc_url: https://libcxx.llvm.org/
 
 extra:
   skip-lints:
-    # there are false positives for these checks,
+    # there are false positives for this check,
     # for some of the individual outputs.
-    - missing_tests
     - should_use_compilers
   recipe-maintainers:
     - SylvainCorlay
