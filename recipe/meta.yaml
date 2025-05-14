@@ -81,6 +81,7 @@ outputs:
         - clangxx
         - ld64                   # [osx]
         - cctools                # [osx]
+        - llvmdev {{ bootstrap_version }}  # [osx]
         - llvm-tools             # [osx]
         - sysroot_{{ target_platform }}  # [linux]
         - {{ compiler('cxx') }}   # [not linux]
