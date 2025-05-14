@@ -109,8 +109,8 @@ outputs:
         - compile_test.bat  # [win]
       commands:
         # These were taken from libcxx-devel in conda-forge, need to make sure they pass or are valuable
-        # - bash compile_test.sh                                    # [unix]
-        # - compile_test.bat                                        # [win]
+        - bash compile_test.sh                                    # [unix]
+        - compile_test.bat                                        # [win]
         # presence of shared & static libraries
         - test -f $PREFIX/lib/libc++.so                 # [linux]
         - test -f $PREFIX/lib/libc++.dylib              # [osx]
