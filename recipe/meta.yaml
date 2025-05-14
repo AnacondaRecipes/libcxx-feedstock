@@ -56,8 +56,8 @@ requirements:
     - m2-patch                # [win]
     - llvm
   host:
-    - clangdev {{ bootstrap_version }}
-    - llvm {{ bootstrap_version }}
+    - clangdev {{ bootstrap_version }}  # [not osx]
+    - llvm {{ bootstrap_version }}      # [not osx]
 
 outputs:
 
@@ -82,8 +82,9 @@ outputs:
         - ld64                   # [osx]
         - cctools                # [osx]
         - llvm-tools             # [osx]
-        - {{ compiler('cxx') }}  # [not osx and not linux]
         - sysroot_{{ target_platform }}  # [linux]
+        - {{ compiler('cxx') }}   # [not linux]
+        - {{ compiler('c') }}     # [not linux]
       files:
         - test_sources
         - compile_test.sh   # [unix]
