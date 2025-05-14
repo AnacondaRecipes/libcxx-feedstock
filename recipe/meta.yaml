@@ -19,7 +19,7 @@ source:
       - patches/0001-Support-legacy-standalone-builds.patch
       # See https://discourse.llvm.org/t/shipping-custom-libc-on-macos/58606
       - patches/0002-Fix-ABI-compatibility-with-system.patch    # [sys_abi == "pre-12"]
-      - patches/0003-custom-error-message-for-old-sdk.patch
+      # - patches/0003-custom-error-message-for-old-sdk.patch
       # upstream removed fallbacks in case the underlying libc didn't support C11 in
       # https://github.com/llvm/llvm-project/commit/21f73d5826fb5024a27eaacafadfa316f58949c5;
       # using new libcxx with old clang versions (beyond what upstream supports) relies on
@@ -61,10 +61,45 @@ requirements:
 
 outputs:
 
-  ######
-  # TODO: Evaluate when/if we want to split out libcxx-devel as its own package, as
-  # conda-forge did:
-  # https://github.com/conda-forge/libcxx-feedstock/blob/17.x/recipe/meta.yaml#L47
+  - name: libcxx-devel
+    files:
+      - include/c++                 # [unix]
+      - Library/include/c++         # [win]
+    requirements:
+      host:
+        - {{ pin_subpackage("libcxx", exact=True) }}
+      run:
+        - {{ pin_subpackage("libcxx", max_pin=None) }}
+      run_constrained:
+        - __osx <12     # [osx and (sys_abi == "pre-12")]
+
+    # package for old sys_abi is not installable on macOS-12 image anymore
+    {% if sys_abi != "pre-12" %}
+    test:
+      requires:
+        - clang                  # [osx]
+        - clangxx
+        - ld64                   # [osx]
+        - cctools                # [osx]
+        - llvm-tools             # [osx]
+        - {{ compiler('cxx') }}
+      files:
+        - test_sources
+        - compile_test.sh   # [unix]
+        - compile_test.bat  # [win]
+      commands:
+        # Dummy var for different hashes
+        - echo {{ dummy_var }}                                    # [osx]
+        - echo {{ sys_abi }}                                      # [osx]
+        - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
+        - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
+        - bash compile_test.sh                                    # [unix]
+        - compile_test.bat                                        # [win]
+        # we do not ship libcxxabi on OSX - this breaks exception passing
+        - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
+        - test -f $PREFIX/lib/libc++abi.so                        # [linux]
+      {% endif %}
+
 
   # Honestly not sure where the 'hardening' is used (or if) but leaving it here for
   # consistency. There are also some comments in here that I think may be out of date
@@ -103,14 +138,7 @@ outputs:
       run_constrained:
         - sysroot_{{ target_platform }} >={{ c_stdlib_version }}    # [linux]
     test:
-      files:
-        - test_sources
-        - compile_test.sh   # [unix]
-        - compile_test.bat  # [win]
       commands:
-        # These were taken from libcxx-devel in conda-forge, need to make sure they pass or are valuable
-        # - bash compile_test.sh                                    # [unix]
-        # - compile_test.bat                                        # [win]
         # presence of shared & static libraries
         - test -f $PREFIX/lib/libc++.so                 # [linux]
         - test -f $PREFIX/lib/libc++.dylib              # [osx]
