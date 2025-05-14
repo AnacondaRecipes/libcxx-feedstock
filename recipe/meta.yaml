@@ -29,8 +29,6 @@ source:
 build:
   number: 1
   skip: true  # [win]
-  # I don't believe we can build this on linux with the sysroot we have
-  skip: true  # [linux]
   
   #TODO: does this even come in?
   ignore_run_exports:
@@ -49,8 +47,10 @@ requirements:
     - cmake
     - ninja
     - make                    # [unix]
-    - {{ compiler('cxx') }}
-    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}   # [not linux]
+    - {{ compiler('c') }}     # [not linux]
+    - clangxx                 # [linux]
+    - clang                   # [linux]
     - python                  # [not osx]
     - patch                   # [unix]
     - m2-patch                # [win]
@@ -82,7 +82,9 @@ outputs:
         - ld64                   # [osx]
         - cctools                # [osx]
         - llvm-tools             # [osx]
-        - {{ compiler('cxx') }}
+        - sysroot_{{ target_platform }}  # [linux]
+        - {{ compiler('cxx') }}   # [not linux]
+        - {{ compiler('c') }}     # [not linux]
       files:
         - test_sources
         - compile_test.sh   # [unix]
