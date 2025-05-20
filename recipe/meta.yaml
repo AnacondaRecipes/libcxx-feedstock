@@ -30,7 +30,7 @@ build:
   number: 1
   skip: true  # [win]
   
-  #TODO: does this even come in?
+  # Prevent mixing with GNU's implementation
   ignore_run_exports:
     - libstdcxx-ng
   missing_dso_whitelist:
@@ -155,13 +155,6 @@ outputs:
   - name: libcxxabi
     build:
       skip: true  # [not linux]
-      # missing_dso_whitelist:
-      #   - /lib64/libpthread.so.0
-      #   - /lib64/libc.so.6
-      #   - /lib64/ld64.so.2
-      #   - /lib64/libgcc_s.so.1
-      #   - /lib64/ld-linux-aarch64.so.1
-      #   - /lib64/ld-linux-x86-64.so.2
     files:
       - lib/libc++abi.*
     requirements:
