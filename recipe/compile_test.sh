@@ -36,3 +36,10 @@ do
     clang++ -stdlib=libc++ -std=c++14 -O2 -g $f $LINK_FLAGS
     ./a.out
 done
+
+FILES=test_sources/cpp17/*.cpp
+for f in $FILES
+do
+    clang++ -stdlib=libc++ -std=c++23 -O2 -g $f $LINK_FLAGS
+    ./a.out
+done
