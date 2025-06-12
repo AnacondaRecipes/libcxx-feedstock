@@ -53,7 +53,6 @@ outputs:
     files:
       - include/c++/v1                   # [unix]
       - lib/libc++{{ SHLIB_EXT }}        # [unix]
-      - lib/libc++{{ SHLIB_EXT }}.*      # [unix]
       - lib/libc++.a                     # [unix]
       - lib/libc++experimental.a         # [unix]
       - "share/licenses/libc++-devel/*"  # [unix]
