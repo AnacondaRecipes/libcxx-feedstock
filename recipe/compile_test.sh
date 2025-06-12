@@ -2,7 +2,6 @@ set -xe
 
 LINK_FLAGS="-Wl,-rpath,$PREFIX/lib -L$PREFIX/lib -Wl,-v -v"
 
-# target platform is empty here now
 if [[ "$target_platform" == osx* ]]; then
     llvm-nm $PREFIX/lib/libc++.1.dylib
 else
