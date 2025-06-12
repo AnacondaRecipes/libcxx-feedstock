@@ -52,7 +52,7 @@ outputs:
   - name: libcxx-devel
     files:
       - include/c++/v1                   # [unix]
-      - lib/libc++.${SHLIB_EXT}          # [unix]
+      - lib/libc++${SHLIB_EXT}          # [unix]
       - lib/libc++.a                     # [unix]
       - lib/libc++experimental.a         # [unix]
       - "share/licenses/libc++-devel/*"  # [unix]
@@ -80,7 +80,7 @@ outputs:
         # Dummy var for different hashes
         - echo {{ dummy_var }}                                    # [osx]
         - echo {{ macos_min_version }}                            # [osx]
-        - test -f $PREFIX/lib/libc++.{{ SHLIB_EXT }}              # [unix]
+        - test -f $PREFIX/lib/libc++${SHLIB_EXT}                  # [unix]
         - test -f $PREFIX/lib/libc++.a                            # [unix]
         - test -f $PREFIX/lib/libc++experimental.a                # [unix]
         - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
@@ -142,7 +142,7 @@ outputs:
         - libcxx {{ version }}.*
     test:
       commands:
-        - test -f $PREFIX/lib/libc++abi.${SHLIB_EXT}  # [unix]
+        - test -f $PREFIX/lib/libc++abi${SHLIB_EXT}  # [unix]
 
 about:
   home: https://libcxx.llvm.org/
