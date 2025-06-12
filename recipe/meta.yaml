@@ -1,10 +1,6 @@
 {% set version = "17.0.6" %}
 {% set major = version.split(".")[0] %}
 
-{% if sys_abi is undefined %}
-{% set sys_abi = "dummy" %}
-{% endif %}
-
 {% set bootstrap_version = "17.0.6" %}
 
 
@@ -17,9 +13,6 @@ source:
     sha256: 58a8818c60e6627064f312dbf46c02d9949956558340938b71cf731ad8bc0813
     patches:
       - patches/0001-Support-legacy-standalone-builds.patch
-      # See https://discourse.llvm.org/t/shipping-custom-libc-on-macos/58606
-      - patches/0002-Fix-ABI-compatibility-with-system.patch    # [sys_abi == "pre-12"]
-      # - patches/0003-custom-error-message-for-old-sdk.patch
       # upstream removed fallbacks in case the underlying libc didn't support C11 in
       # https://github.com/llvm/llvm-project/commit/21f73d5826fb5024a27eaacafadfa316f58949c5;
       # using new libcxx with old clang versions (beyond what upstream supports) relies on
@@ -70,11 +63,7 @@ outputs:
         - {{ pin_subpackage("libcxx", exact=True) }}
       run:
         - {{ pin_subpackage("libcxx", max_pin=None) }}
-      run_constrained:
-        - __osx <12     # [osx and (sys_abi == "pre-12")]
 
-    # package for old sys_abi is not installable on macOS-12 image anymore
-    {% if sys_abi != "pre-12" %}
     test:
       requires:
         - clang                  # [osx]
@@ -93,7 +82,6 @@ outputs:
       commands:
         # Dummy var for different hashes
         - echo {{ dummy_var }}                                    # [osx]
-        - echo {{ sys_abi }}                                      # [osx]
         - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
         - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
         - bash compile_test.sh                                    # [unix]
@@ -101,7 +89,6 @@ outputs:
         # we do not ship libcxxabi on OSX - this breaks exception passing
         - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
         - test -f $PREFIX/lib/libc++abi.so                        # [linux]
-      {% endif %}
 
 
   # Honestly not sure where the 'hardening' is used (or if) but leaving it here for
