@@ -52,7 +52,8 @@ outputs:
   - name: libcxx-devel
     files:
       - include/c++/v1                   # [unix]
-      - lib/libc++${SHLIB_EXT}          # [unix]
+      - lib/libc++{{ SHLIB_EXT }}        # [unix]
+      - lib/libc++{{ SHLIB_EXT }}.*      # [unix]
       - lib/libc++.a                     # [unix]
       - lib/libc++experimental.a         # [unix]
       - "share/licenses/libc++-devel/*"  # [unix]
@@ -125,8 +126,8 @@ outputs:
         # presence of shared libraries
         - test -f $PREFIX/lib/libc++.1.dylib            # [osx]
         - test -f $PREFIX/lib/libc++.1.0.dylib          # [osx]
-        - test -f $PREFIX/lib/libc++.1.so               # [linux]
-        - test -f $PREFIX/lib/libc++.1.0.so             # [linux]
+        - test -f $PREFIX/lib/libc++.so.1               # [linux]
+        - test -f $PREFIX/lib/libc++.so.1.0             # [linux]
         # absence of headers
         - test ! -d $PREFIX/include/c++                 # [unix]
 
