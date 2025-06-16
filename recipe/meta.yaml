@@ -1,4 +1,8 @@
-{% set version = "14.0.6" %}
+{% set version = "17.0.6" %}
+{% set major = version.split(".")[0] %}
+
+{% set bootstrap_version = "17.0.6" %}
+
 
 package:
   name: libcxx_and_libcxxabi
@@ -6,20 +10,15 @@ package:
 
 source:
   - url: https://github.com/llvm/llvm-project/releases/download/llvmorg-{{ version.replace(".rc", "-rc") }}/llvm-project-{{ version.replace(".rc", "rc") }}.src.tar.xz
-    sha256: 8b3cfd7bc695bd6cea0f37f53f0981f34f87496e79e2529874fd03a2f9dd3a8a
+    sha256: 58a8818c60e6627064f312dbf46c02d9949956558340938b71cf731ad8bc0813
     patches:
-      - patches/0001-libcxxabi-10.9-compatibility.patch  # [osx and x86_64]
-      - patches/0002-Support-legacy-standalone-builds.patch
-      # See https://lists.llvm.org/pipermail/libcxx-dev/2021-July/001172.html
-      - patches/0003-Fix-ABI-compatibility-with-system.patch
-      - patches/0004-custom-error-message-for-old-sdk.patch
+      - patches/0001-Support-legacy-standalone-builds.patch
 
 build:
-  number: 0
+  number: 1
   skip: true  # [win]
-  skip: True  # [linux and s390x]
-  skip: True  # [py<30]
-
+  
+  # Prevent mixing with GNU's implementation
   ignore_run_exports:
     - libstdcxx-ng
   missing_dso_whitelist:
@@ -34,43 +33,45 @@ build:
 requirements:
   build:
     - cmake
+    - ninja
     - make                    # [unix]
-    - {{ compiler('c') }}
-    - {{ compiler('cxx') }}
+    - {{ compiler('cxx') }}   # [not linux]
+    - {{ compiler('c') }}     # [not linux]
+    - clangxx                 # [linux]
+    - clang                   # [linux]
     - python                  # [not osx]
     - patch                   # [unix]
     - m2-patch                # [win]
+    - llvm
   host:
-    - clangdev {{ version }}  # [not osx]
-    - llvmdev {{ version }}   # [not osx]
+    - clangdev {{ bootstrap_version }}  # [not osx]
+    - llvm {{ bootstrap_version }}      # [not osx]
 
 outputs:
-  - name: libcxx
+
+  - name: libcxx-devel
     files:
-      - include/c++
-      - Library/include/c++
-      - lib/libc++.*
-      - lib/libc++fs.*
-      - lib/libc++experimental.*
-      - Library/bin/c++*.dll
-      - Library/lib/c++*.lib
-      - Library/lib/libc++*.lib
+      - include/c++/v1                   # [unix]
+      - lib/libc++{{ SHLIB_EXT }}        # [unix]
+      - lib/libc++.a                     # [unix]
+      - lib/libc++experimental.a         # [unix]
+      - "share/licenses/libc++-devel/*"  # [unix]
     requirements:
-      build:
-        - {{ compiler('cxx') }}
       host:
-        - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
+        - {{ pin_subpackage("libcxx", exact=True) }}
       run:
-        - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
+        - {{ pin_subpackage("libcxx", exact=True) }}
+
     test:
       requires:
         - clang                  # [osx]
         - clangxx
         - ld64                   # [osx]
         - cctools                # [osx]
-        - compiler-rt            # [osx]
+        - llvmdev {{ bootstrap_version }}  # [osx]
         - llvm-tools             # [osx]
-        - {{ compiler('cxx') }}  # [not osx]
+        - {{ compiler('cxx') }}   # [not linux]
+        - {{ compiler('c') }}     # [not linux]
       files:
         - test_sources
         - compile_test.sh   # [unix]
@@ -78,40 +79,70 @@ outputs:
       commands:
         # Dummy var for different hashes
         - echo {{ dummy_var }}                                    # [osx]
+        - echo {{ macos_min_version }}                            # [osx]
+        - test -f $PREFIX/lib/libc++${SHLIB_EXT}                  # [unix]
+        - test -f $PREFIX/lib/libc++.a                            # [unix]
+        - test -f $PREFIX/lib/libc++experimental.a                # [unix]
         - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
         - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
         - bash compile_test.sh                                    # [unix]
         - compile_test.bat                                        # [win]
-        # !!!!!!!!!!!! README !!!!!!!!!!!!!!!!!!
         # we do not ship libcxxabi on OSX - this breaks exception passing
         - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
         - test -f $PREFIX/lib/libc++abi.so                        # [linux]
 
-      # Following 2 projects had issues with libc++, so check them
-      # before releasing just to be sure.
-      # downstreams:   # [osx]
-      #  - python-symengine  # [osx]
-      #  - openturns         # [osx]
-      #  - libcxx-testing    # [osx]
+
+  # Honestly not sure where the 'hardening' is used (or if) but leaving it here for
+  # consistency. There are also some comments in here that I think may be out of date
+  # but I haven't had a chance to check on them because they seem reasonable.
+  - name: libcxx
+    build:
+      string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}        # [hardening == "none"]
+      string: debug_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [hardening == "debug"]
+      run_exports:                                      # [hardening == "debug"]
+        # packages built with hardened lib must not be installable without extra label
+        - libcxx =*=debug*                              # [hardening == "debug"]
+        - libcxx                                        # [hardening == "none"]
+      ignore_run_exports_from:
+        # we want to ignore libstdcxx, but not libgcc; the latter also comes in through
+        # compiler('c'), and conda keeps that despite ignoring the cxx run-exports
+        - {{ compiler('cxx') }}
+    files:
+      - lib/libc++.so.*                 # [linux]
+      - lib/libc++experimental.so.*     # [linux]
+      - lib/libc++.*.dylib              # [osx]
+      - lib/libc++experimental.*.dylib  # [osx]
+    requirements:
+      build:
+        - {{ compiler('c') }}
+        - {{ compiler('cxx') }}
+      host:
+        - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
+      run:
+        - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
+    test:
+      commands:
+        # presence of shared libraries
+        - test -f $PREFIX/lib/libc++.1.dylib            # [osx]
+        - test -f $PREFIX/lib/libc++.1.0.dylib          # [osx]
+        - test -f $PREFIX/lib/libc++.so.1               # [linux]
+        - test -f $PREFIX/lib/libc++.so.1.0             # [linux]
+        # absence of headers
+        - test ! -d $PREFIX/include/c++                 # [unix]
 
   - name: libcxxabi
     build:
       skip: true  # [not linux]
-      missing_dso_whitelist:
-        - /lib64/libpthread.so.0
-        - /lib64/libc.so.6
-        - /lib64/ld64.so.2
-        - /lib64/libgcc_s.so.1
-        - /lib64/ld-linux-aarch64.so.1
-        - /lib64/ld-linux-x86-64.so.2
     files:
       - lib/libc++abi.*
     requirements:
+      build:
+        - {{ compiler('c') }}
       run_constrained:
         - libcxx {{ version }}.*
     test:
       commands:
-        - test -f $PREFIX/lib/libc++abi.so  # [linux]
+        - test -f $PREFIX/lib/libc++abi${SHLIB_EXT}  # [unix]
 
 about:
   home: https://libcxx.llvm.org/
@@ -119,10 +150,19 @@ about:
   license_file: libcxx/LICENSE.TXT
   license_family: Apache
   summary: LLVM C++ standard library
+  description: |
+    libc++ is an implementation of the C++ standard library developed by the LLVM project. 
+    It supports C++11, C++14, C++17, and parts of C++20. 
+    This package also includes libc++abi, which provides the low-level runtime support needed 
+    by libc++, including exception handling and other ABI-related features.
   dev_url: https://github.com/llvm/llvm-project
   doc_url: https://libcxx.llvm.org/
 
 extra:
+  skip-lints:
+    # there are false positives for this check,
+    # for some of the individual outputs.
+    - should_use_compilers
   recipe-maintainers:
     - SylvainCorlay
     - inducer
