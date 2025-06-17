@@ -15,7 +15,7 @@ source:
       - patches/0001-Support-legacy-standalone-builds.patch
 
 build:
-  number: 1
+  number: 2
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation
@@ -61,6 +61,9 @@ outputs:
         - {{ pin_subpackage("libcxx", exact=True) }}
       run:
         - {{ pin_subpackage("libcxx", exact=True) }}
+      run_constrained:
+        - clang {{ bootstrap_version }}
+        - llvm {{ bootstrap_version }}
 
     test:
       requires:
@@ -120,6 +123,9 @@ outputs:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
+      run_constrained:
+        - clang {{ bootstrap_version }}
+        - llvm {{ bootstrap_version }}
     test:
       commands:
         # presence of shared libraries
