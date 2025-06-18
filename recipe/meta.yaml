@@ -1,4 +1,4 @@
-{% set version = "17.0.6" %}
+{% set version = "19.1.1" %}
 {% set major = version.split(".")[0] %}
 
 {% set bootstrap_version = "17.0.6" %}
@@ -10,12 +10,10 @@ package:
 
 source:
   - url: https://github.com/llvm/llvm-project/releases/download/llvmorg-{{ version.replace(".rc", "-rc") }}/llvm-project-{{ version.replace(".rc", "rc") }}.src.tar.xz
-    sha256: 58a8818c60e6627064f312dbf46c02d9949956558340938b71cf731ad8bc0813
-    patches:
-      - patches/0001-Support-legacy-standalone-builds.patch
+    sha256: d40e933e2a208ee142898f85d886423a217e991abbcd42dd8211f507c93e1266
 
 build:
-  number: 3
+  number: 0
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation
@@ -44,8 +42,8 @@ requirements:
     - m2-patch                # [win]
     - llvm
   host:
-    - clangdev {{ version }}  # [not osx]
-    - llvm {{ version }}      # [not osx]
+    - clangdev {{ bootstrap_version }}  # [not osx]
+    - llvm {{ bootstrap_version }}      # [not osx]
 
 outputs:
 
@@ -62,10 +60,10 @@ outputs:
       run:
         - {{ pin_subpackage("libcxx", exact=True) }}
       run_constrained:
-        - clang {{ version }}
-        - llvm {{ version }}
-        - llvm-openmp  {{ version }}
-        - llvm-tools  {{ version }}
+        - clang {{ bootstrap_version }}
+        - llvm {{ bootstrap_version }}
+        - llvm-openmp  {{ bootstrap_version }}
+        - llvm-tools  {{ bootstrap_version }}
 
     test:
       requires:
@@ -73,7 +71,7 @@ outputs:
         - clangxx
         - ld64                   # [osx]
         - cctools                # [osx]
-        - llvmdev {{ version }}  # [osx]
+        - llvmdev {{ bootstrap_version }}  # [osx]
         - llvm-tools             # [osx]
         - {{ compiler('cxx') }}   # [not linux]
         - {{ compiler('c') }}     # [not linux]
@@ -126,10 +124,10 @@ outputs:
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run_constrained:
-        - clang {{ version }}
-        - llvm {{ version }}
-        - llvm-openmp  {{ version }}
-        - llvm-tools  {{ version }}
+        - clang {{ bootstrap_version }}
+        - llvm {{ bootstrap_version }}
+        - llvm-openmp  {{ bootstrap_version }}
+        - llvm-tools  {{ bootstrap_version }}
     test:
       commands:
         # presence of shared libraries
@@ -149,7 +147,7 @@ outputs:
       build:
         - {{ compiler('c') }}
       run_constrained:
-        - libcxx {{ version }}.*
+        - libcxx {{ bootstrap_version }}.*
     test:
       commands:
         - test -f $PREFIX/lib/libc++abi${SHLIB_EXT}  # [unix]

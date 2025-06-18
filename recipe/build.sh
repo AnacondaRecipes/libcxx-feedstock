@@ -7,6 +7,8 @@ if [[ "$target_platform" == osx-* ]]; then
     export CXXFLAGS="$CXXFLAGS -isysroot $CONDA_BUILD_SYSROOT"
     export LDFLAGS="$LDFLAGS -isysroot $CONDA_BUILD_SYSROOT"
     export INSTALL_NAME_TOOL="/usr/bin/install_name_tool"
+    export LDFLAGS="$LDFLAGS -isysroot $CONDA_BUILD_SYSROOT -framework CoreFoundation"
+
     export CMAKE_EXTRA_ARGS="-DCMAKE_OSX_SYSROOT=$CONDA_BUILD_SYSROOT -DLIBCXX_ENABLE_VENDOR_AVAILABILITY_ANNOTATIONS=ON"
 fi
 
@@ -25,19 +27,13 @@ cmake -G Ninja \
     -DLIBCXX_INCLUDE_BENCHMARKS=OFF \
     -DLIBCXX_INCLUDE_DOCS=OFF \
     -DLIBCXX_INCLUDE_TESTS=OFF \
+    -DLIBCXX_HARDENING_MODE="none" \
+    -DLIBCXXABI_USE_LLVM_UNWINDER=OFF \
     -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
     $CMAKE_ARGS \
     $CMAKE_EXTRA_ARGS
 
-# For reference, this is how to build a bootstrap version, we might want to do this in a later 
-# and/or reorganize these somehow with clangdev, compiler-rt, llvmdev, etc.
-# https://libcxx.llvm.org/VendorDocumentation.html#the-bootstrapping-build
-# $ cmake -G Ninja -S llvm -B build -DLLVM_ENABLE_PROJECTS="clang"                      \  # Configure
-#                                   -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
-#                                   -DLLVM_RUNTIME_TARGETS="<target-triple>"
-# $ ninja -C build runtimes                                                                # Build
-# $ ninja -C build check-runtimes                                                          # Test
-# $ ninja -C build install-runtimes                                                        # Install
+# -DLIBCXX_ENABLE_TIME_ZONE_DATABASE=ON \
 
 # Build
 ninja -C build cxx cxxabi unwind
