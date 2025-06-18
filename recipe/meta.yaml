@@ -15,7 +15,7 @@ source:
       - patches/0001-Support-legacy-standalone-builds.patch
 
 build:
-  number: 2
+  number: 3
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation
@@ -44,8 +44,8 @@ requirements:
     - m2-patch                # [win]
     - llvm
   host:
-    - clangdev {{ bootstrap_version }}  # [not osx]
-    - llvm {{ bootstrap_version }}      # [not osx]
+    - clangdev {{ version }}  # [not osx]
+    - llvm {{ version }}      # [not osx]
 
 outputs:
 
@@ -62,8 +62,10 @@ outputs:
       run:
         - {{ pin_subpackage("libcxx", exact=True) }}
       run_constrained:
-        - clang {{ bootstrap_version }}
-        - llvm {{ bootstrap_version }}
+        - clang {{ version }}
+        - llvm {{ version }}
+        - llvm-openmp  {{ version }}
+        - llvm-tools  {{ version }}
 
     test:
       requires:
@@ -71,7 +73,7 @@ outputs:
         - clangxx
         - ld64                   # [osx]
         - cctools                # [osx]
-        - llvmdev {{ bootstrap_version }}  # [osx]
+        - llvmdev {{ version }}  # [osx]
         - llvm-tools             # [osx]
         - {{ compiler('cxx') }}   # [not linux]
         - {{ compiler('c') }}     # [not linux]
@@ -124,8 +126,10 @@ outputs:
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run_constrained:
-        - clang {{ bootstrap_version }}
-        - llvm {{ bootstrap_version }}
+        - clang {{ version }}
+        - llvm {{ version }}
+        - llvm-openmp  {{ version }}
+        - llvm-tools  {{ version }}
     test:
       commands:
         # presence of shared libraries
