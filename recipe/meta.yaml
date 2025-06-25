@@ -15,7 +15,7 @@ source:
       - patches/0001-Support-legacy-standalone-builds.patch
 
 build:
-  number: 3
+  number: 4
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation
@@ -51,11 +51,8 @@ outputs:
 
   - name: libcxx-devel
     files:
-      - include/c++/v1                   # [unix]
-      - lib/libc++{{ SHLIB_EXT }}        # [unix]
-      - lib/libc++.a                     # [unix]
-      - lib/libc++experimental.a         # [unix]
-      - "share/licenses/libc++-devel/*"  # [unix]
+      - include/c++                 # [unix]
+      - Library/include/c++         # [win]
     requirements:
       host:
         - {{ pin_subpackage("libcxx", exact=True) }}
@@ -85,9 +82,6 @@ outputs:
         # Dummy var for different hashes
         - echo {{ dummy_var }}                                    # [osx]
         - echo {{ macos_min_version }}                            # [osx]
-        - test -f $PREFIX/lib/libc++${SHLIB_EXT}                  # [unix]
-        - test -f $PREFIX/lib/libc++.a                            # [unix]
-        - test -f $PREFIX/lib/libc++experimental.a                # [unix]
         - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
         - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
         - bash compile_test.sh                                    # [unix]
@@ -113,10 +107,15 @@ outputs:
         # compiler('c'), and conda keeps that despite ignoring the cxx run-exports
         - {{ compiler('cxx') }}
     files:
-      - lib/libc++.so.*                 # [linux]
-      - lib/libc++experimental.so.*     # [linux]
-      - lib/libc++.*.dylib              # [osx]
-      - lib/libc++experimental.*.dylib  # [osx]
+      - lib/libc++.so               # [linux]
+      - lib/libc++.so.*             # [linux]
+      - lib/libc++.dylib            # [osx]
+      - lib/libc++.*.dylib          # [osx]
+      - Library/bin/c++*.dll        # [win]
+      - lib/libc++.a                # [unix]
+      - lib/libc++experimental.*    # [unix]
+      - Library/lib/c++*.lib        # [win]
+      - Library/lib/libc++*.lib     # [win]
     requirements:
       build:
         - {{ compiler('c') }}
@@ -132,13 +131,13 @@ outputs:
         - llvm-tools  {{ version }}
     test:
       commands:
-        # presence of shared libraries
-        - test -f $PREFIX/lib/libc++.1.dylib            # [osx]
-        - test -f $PREFIX/lib/libc++.1.0.dylib          # [osx]
-        - test -f $PREFIX/lib/libc++.so.1               # [linux]
-        - test -f $PREFIX/lib/libc++.so.1.0             # [linux]
+        # presence of shared & static libraries
+        - test -f $PREFIX/lib/libc++.so                 # [linux]
+        - test -f $PREFIX/lib/libc++.dylib              # [osx]
+        - test -f $PREFIX/lib/libc++.a                  # [unix]
+        - test -f $PREFIX/lib/libc++experimental.a      # [unix]
         # absence of headers
-        - test ! -d $PREFIX/include/c++                 # [unix]
+        - test ! -d $PREFIX/include/c++                 # [uni
 
   - name: libcxxabi
     build:
