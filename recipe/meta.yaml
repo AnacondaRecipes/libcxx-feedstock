@@ -59,7 +59,7 @@ outputs:
       run_constrained:
         - clang {{ version }}
         - llvm {{ version }}
-        - llvm-openmp  {{ version }}
+        - llvm-openmp  {{ bootstrap_version }}
         - llvm-tools  {{ version }}
 
     test:
@@ -125,7 +125,7 @@ outputs:
       run_constrained:
         - clang {{ version }}
         - llvm {{ version }}
-        - llvm-openmp  {{ version }}
+        - llvm-openmp  {{ bootstrap_version }}
         - llvm-tools  {{ version }}
     test:
       commands:
