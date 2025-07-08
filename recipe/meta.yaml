@@ -146,7 +146,7 @@ outputs:
       build:
         - {{ compiler('c') }}
       run_constrained:
-        - libcxx {{ bootstrap_version }}.*
+        - libcxx {{ version }}.*
     test:
       commands:
         - test -f $PREFIX/lib/libc++abi${SHLIB_EXT}  # [unix]
