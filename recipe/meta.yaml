@@ -38,8 +38,6 @@ requirements:
     - clangxx                 # [linux]
     - clang                   # [linux]
     - python                  # [not osx]
-    - patch                   # [unix]
-    - m2-patch                # [win]
     - llvm
   host:
     - clangdev {{ bootstrap_version }}  # [not osx]
