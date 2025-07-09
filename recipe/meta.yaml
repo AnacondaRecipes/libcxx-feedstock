@@ -56,11 +56,11 @@ outputs:
         - {{ pin_subpackage("libcxx", exact=True) }}
       run:
         - {{ pin_subpackage("libcxx", exact=True) }}
-      run_constrained:
-        - clang {{ version }}
-        - llvm {{ version }}
-        - llvm-openmp  {{ bootstrap_version }}
-        - llvm-tools  {{ version }}
+      # run_constrained:
+      #   - clang {{ version }}
+      #   - llvm {{ version }}
+      #   - llvm-openmp  {{ version }}
+      #   - llvm-tools  {{ version }}
 
     test:
       requires:
@@ -122,11 +122,11 @@ outputs:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
-      run_constrained:
-        - clang {{ version }}
-        - llvm {{ version }}
-        - llvm-openmp  {{ bootstrap_version }}
-        - llvm-tools  {{ version }}
+      # run_constrained:
+      #   - clang {{ version }}
+      #   - llvm {{ version }}
+      #   - llvm-openmp  {{ version }}
+      #   - llvm-tools  {{ version }}
     test:
       commands:
         # presence of shared & static libraries
@@ -145,8 +145,8 @@ outputs:
     requirements:
       build:
         - {{ compiler('c') }}
-      run_constrained:
-        - libcxx {{ version }}.*
+      # run_constrained:
+      #   - libcxx {{ version }}.*
     test:
       commands:
         - test -f $PREFIX/lib/libc++abi${SHLIB_EXT}  # [unix]
