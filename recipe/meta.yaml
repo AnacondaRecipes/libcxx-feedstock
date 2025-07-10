@@ -1,7 +1,7 @@
-{% set version = "19.1.1" %}
+{% set version = "19.1.7" %}
 {% set major = version.split(".")[0] %}
 
-{% set bootstrap_version = "17.0.6" %}
+{% set bootstrap_version = "19.1.7" %}
 
 
 package:
@@ -10,10 +10,17 @@ package:
 
 source:
   - url: https://github.com/llvm/llvm-project/releases/download/llvmorg-{{ version.replace(".rc", "-rc") }}/llvm-project-{{ version.replace(".rc", "rc") }}.src.tar.xz
-    sha256: d40e933e2a208ee142898f85d886423a217e991abbcd42dd8211f507c93e1266
+    sha256: 82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501
+    patches:
+      # disable feature that requires up-to-date libcxxabi, which we don't ship
+      - patches/0001-disable-_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPT.patch  # [osx]
+      # work around https://github.com/llvm/llvm-project/issues/90332
+      - patches/0002-Work-around-stray-nostdlib-flags-causing-errors-with.patch  # [osx]
+      # allow chrono implementation to work on osx
+      - patches/0003-patch-__libcpp_tzdb_directory-to-allow-use-on-osx.patch  # [osx]
 
 build:
-  number: 0
+  number: 3
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation
@@ -33,6 +40,7 @@ requirements:
     - cmake
     - ninja
     - make                    # [unix]
+    - patch                   # [osx]
     - {{ compiler('cxx') }}   # [not linux]
     - {{ compiler('c') }}     # [not linux]
     - clangxx                 # [linux]
@@ -48,17 +56,21 @@ outputs:
   - name: libcxx-devel
     files:
       - include/c++                 # [unix]
+      # for C++20 modules, which are installed into $PREFIX/share/libc++
+      - share/libc++                # [unix]
       - Library/include/c++         # [win]
+      # also for C++20 modules
+      - lib/libc++.modules.json     # [unix]
     requirements:
       host:
         - {{ pin_subpackage("libcxx", exact=True) }}
       run:
         - {{ pin_subpackage("libcxx", exact=True) }}
-      # run_constrained:
-      #   - clang {{ version }}
-      #   - llvm {{ version }}
-      #   - llvm-openmp  {{ version }}
-      #   - llvm-tools  {{ version }}
+      run_constrained:
+        - clang {{ version }}
+        - llvm {{ version }}
+        - llvm-openmp  {{ version }}
+        - llvm-tools  {{ version }}
 
     test:
       requires:
@@ -70,6 +82,7 @@ outputs:
         - llvm-tools             # [osx]
         - {{ compiler('cxx') }}   # [not linux]
         - {{ compiler('c') }}     # [not linux]
+        - {{ stdlib('c') }}       # [osx]
       files:
         - test_sources
         - compile_test.sh   # [unix]
@@ -120,11 +133,11 @@ outputs:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
-      # run_constrained:
-      #   - clang {{ version }}
-      #   - llvm {{ version }}
-      #   - llvm-openmp  {{ version }}
-      #   - llvm-tools  {{ version }}
+      run_constrained:
+        - clang {{ version }}
+        - llvm {{ version }}
+        - llvm-openmp  {{ version }}
+        - llvm-tools  {{ version }}
     test:
       commands:
         # presence of shared & static libraries
@@ -143,8 +156,8 @@ outputs:
     requirements:
       build:
         - {{ compiler('c') }}
-      # run_constrained:
-      #   - libcxx {{ version }}.*
+      run_constrained:
+        - libcxx {{ version }}.*
     test:
       commands:
         - test -f $PREFIX/lib/libc++abi${SHLIB_EXT}  # [unix]
