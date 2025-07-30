@@ -43,6 +43,7 @@ requirements:
     - patch                   # [osx]
     - {{ compiler('cxx') }}   # [not linux]
     - {{ compiler('c') }}     # [not linux]
+    - {{ stdlib('c') }}
     - clangxx                 # [linux]
     - clang                   # [linux]
     - python                  # [not osx]
