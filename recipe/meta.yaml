@@ -20,7 +20,7 @@ source:
       - patches/0003-patch-__libcpp_tzdb_directory-to-allow-use-on-osx.patch  # [osx]
 
 build:
-  number: 3
+  number: 4
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation
@@ -67,11 +67,11 @@ outputs:
         - {{ pin_subpackage("libcxx", exact=True) }}
       run:
         - {{ pin_subpackage("libcxx", exact=True) }}
-      run_constrained:
-        - clang {{ version }}
-        - llvm {{ version }}
-        - llvm-openmp  {{ version }}
-        - llvm-tools  {{ version }}
+      # run_constrained:
+      #   - clang {{ version }}
+      #   - llvm {{ version }}
+      #   - llvm-openmp  {{ version }}
+      #   - llvm-tools  {{ version }}
 
     test:
       requires:
@@ -134,11 +134,11 @@ outputs:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
-      run_constrained:
-        - clang {{ version }}
-        - llvm {{ version }}
-        - llvm-openmp  {{ version }}
-        - llvm-tools  {{ version }}
+      # run_constrained:
+      #   - clang {{ version }}
+      #   - llvm {{ version }}
+      #   - llvm-openmp  {{ version }}
+      #   - llvm-tools  {{ version }}
     test:
       commands:
         # presence of shared & static libraries
