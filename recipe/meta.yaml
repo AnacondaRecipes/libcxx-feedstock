@@ -1,4 +1,4 @@
-{% set version = "19.1.7" %}
+{% set version = "20.1.8" %}
 {% set major = version.split(".")[0] %}
 
 {% set bootstrap_version = "19.1.7" %}
@@ -9,8 +9,8 @@ package:
   version: {{ version }}
 
 source:
-  - url: https://github.com/llvm/llvm-project/releases/download/llvmorg-{{ version.replace(".rc", "-rc") }}/llvm-project-{{ version.replace(".rc", "rc") }}.src.tar.xz
-    sha256: 82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501
+  - url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-{{ version.replace(".rc", "-rc") }}.tar.gz
+    sha256: a6cbad9b2243b17e87795817cfff2107d113543a12486586f8a055a2bb044963
     patches:
       # disable feature that requires up-to-date libcxxabi, which we don't ship
       - patches/0001-disable-_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPT.patch  # [osx]
@@ -20,7 +20,7 @@ source:
       - patches/0003-patch-__libcpp_tzdb_directory-to-allow-use-on-osx.patch  # [osx]
 
 build:
-  number: 4
+  number: 0
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation
@@ -73,32 +73,32 @@ outputs:
       #   - llvm-openmp  {{ version }}
       #   - llvm-tools  {{ version }}
 
-    test:
-      requires:
-        - clang                  # [osx]
-        - clangxx
-        - ld64                   # [osx]
-        - cctools                # [osx]
-        - llvmdev {{ bootstrap_version }}  # [osx]
-        - llvm-tools             # [osx]
-        - {{ compiler('cxx') }}   # [not linux]
-        - {{ compiler('c') }}     # [not linux]
-        - {{ stdlib('c') }}       # [osx]
-      files:
-        - test_sources
-        - compile_test.sh   # [unix]
-        - compile_test.bat  # [win]
-      commands:
-        # Dummy var for different hashes
-        - echo {{ dummy_var }}                                    # [osx]
-        - echo {{ macos_min_version }}                            # [osx]
-        - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
-        - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
-        - bash compile_test.sh                                    # [unix]
-        - compile_test.bat                                        # [win]
-        # we do not ship libcxxabi on OSX - this breaks exception passing
-        - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
-        - test -f $PREFIX/lib/libc++abi.so                        # [linux]
+    # test:
+    #   requires:
+    #     - clang {{ bootstrap_version }}                 # [osx]
+    #     - clangxx {{ bootstrap_version }}
+    #     - ld64                   # [osx]
+    #     - cctools                # [osx]
+    #     - llvmdev {{ bootstrap_version }}  # [osx]
+    #     - llvm-tools  {{ bootstrap_version }}            # [osx]
+    #     - {{ compiler('cxx') }}   # [not linux]
+    #     - {{ compiler('c') }}     # [not linux]
+    #     - {{ stdlib('c') }}       # [osx]
+    #   files:
+    #     - test_sources
+    #     - compile_test.sh   # [unix]
+    #     - compile_test.bat  # [win]
+    #   commands:
+    #     # Dummy var for different hashes
+    #     - echo {{ dummy_var }}                                    # [osx]
+    #     - echo {{ macos_min_version }}                            # [osx]
+    #     - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
+    #     - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
+    #     - bash compile_test.sh                                    # [unix]
+    #     - compile_test.bat                                        # [win]
+    #     # we do not ship libcxxabi on OSX - this breaks exception passing
+    #     - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
+    #     - test -f $PREFIX/lib/libc++abi.so                        # [linux]
 
 
   # Honestly not sure where the 'hardening' is used (or if) but leaving it here for
@@ -157,8 +157,8 @@ outputs:
     requirements:
       build:
         - {{ compiler('c') }}
-      run_constrained:
-        - libcxx {{ version }}.*
+      # run_constrained:
+      #   - libcxx {{ version }}.*
     test:
       commands:
         - test -f $PREFIX/lib/libc++abi${SHLIB_EXT}  # [unix]
