@@ -110,8 +110,8 @@ outputs:
         - test -f $PREFIX/lib/libc++.so                 # [linux]
         - test -f $PREFIX/lib/libc++.dylib              # [osx]
         # Verify the symlinks point to versioned libraries
-        - test -f $(readlink -f $PREFIX/lib/libc++.so)  # [linux]
-        - test -f $(readlink $PREFIX/lib/libc++.dylib)  # [osx]
+        - test -f $(readlink -f $PREFIX/lib/libc++.so)     # [linux]
+        - test -f $(readlink -f $PREFIX/lib/libc++.dylib)  # [osx]
 
   # Honestly not sure where the 'hardening' is used (or if) but leaving it here for
   # consistency. There are also some comments in here that I think may be out of date
