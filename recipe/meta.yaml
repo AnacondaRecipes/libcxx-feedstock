@@ -65,6 +65,9 @@ outputs:
       - lib/libc++experimental.a    # [unix]
       - Library/lib/c++*.lib        # [win]
       - Library/lib/libc++*.lib     # [win]
+      - lib/libc++.so               # [linux]
+      - lib/libc++.dylib            # [osx]
+      
     requirements:
       host:
         - {{ pin_subpackage("libcxx", exact=True) }}
@@ -103,7 +106,12 @@ outputs:
         # we do not ship libcxxabi on OSX - this breaks exception passing
         - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
         - test -f $PREFIX/lib/libc++abi.so                        # [linux]
-
+        # Test for non-versioned symlinks
+        - test -f $PREFIX/lib/libc++.so                 # [linux]
+        - test -f $PREFIX/lib/libc++.dylib              # [osx]
+        # Verify the symlinks point to versioned libraries
+        - test -f $(readlink -f $PREFIX/lib/libc++.so)  # [linux]
+        - test -f $(readlink $PREFIX/lib/libc++.dylib)  # [osx]
 
   # Honestly not sure where the 'hardening' is used (or if) but leaving it here for
   # consistency. There are also some comments in here that I think may be out of date
@@ -121,9 +129,7 @@ outputs:
         # compiler('c'), and conda keeps that despite ignoring the cxx run-exports
         - {{ compiler('cxx') }}
     files:
-      - lib/libc++.so               # [linux]
       - lib/libc++.so.*             # [linux]
-      - lib/libc++.dylib            # [osx]
       - lib/libc++.*.dylib          # [osx]
       - Library/bin/c++*.dll        # [win]
     requirements:
@@ -142,11 +148,20 @@ outputs:
         - llvm-tools  {{ version }}
     test:
       commands:
-        # presence of shared & static libraries
-        - test -f $PREFIX/lib/libc++.so                 # [linux]
-        - test -f $PREFIX/lib/libc++.dylib              # [osx]
+        # Test for versioned runtime libraries
+        - test -f $PREFIX/lib/libc++.so.1               # [linux]
+        - test -f $PREFIX/lib/libc++.so.1.0             # [linux]
+        - test -f $PREFIX/lib/libc++.1.dylib            # [osx]
+
+        # Ensure non-versioned symlinks are NOT in runtime package
+        - test ! -L $PREFIX/lib/libc++.so               # [linux]
+        - test ! -L $PREFIX/lib/libc++.dylib            # [osx]
+        
         # absence of headers
         - test ! -d $PREFIX/include/c++                 # [unix]
+
+        # absence of static libraries in runtime package
+        - test ! -f $PREFIX/lib/libc++.a                # [unix]
 
   - name: libcxxabi
     build:
