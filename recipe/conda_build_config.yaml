@@ -7,20 +7,7 @@ cxx_compiler:         # [osx]
 # https://libcxx.llvm.org/index.html#platform-and-compiler-support
 c_compiler_version:
   - 11.2                # [linux]
-  - 17                  # [osx]
+  - 19                  # [osx]
 cxx_compiler_version:
   - 11.2                # [linux]
-  - 17                  # [osx]
-
-dummy_var:              # [osx]
-  - 0                   # [osx and x86_64]
-  - 1                   # [osx and arm64]
-
-# We don't have this in defaults yet either for linux-64:
-# sysroot_linux-64                2.17     h57e8cba_10  pkgs/main
-# this should be updated to the latests 2.x when that work is done.
-c_stdlib_version:           # [linux]
-  # actually would need >=2.24, but we don't have that in conda-forge yet
-  - "2.17"                  # [linux]
-  # w.r.t. to the ABI of the system libcxx, this would need to be 12.0 on macos
-  # but as we only publish one build to main, maintain global lower bounds
+  - 19                  # [osx]
