@@ -1,7 +1,7 @@
 {% set version = "20.1.8" %}
 {% set major = version.split(".")[0] %}
 
-{% set bootstrap_version = "19.1.7" %}
+{% set bootstrap_version = "20.1.8" %}
 
 
 package:
