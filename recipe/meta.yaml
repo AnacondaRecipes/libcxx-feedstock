@@ -40,7 +40,6 @@ requirements:
     - cmake
     - ninja
     - make                    # [unix]
-    - patch                   # [osx]
     - {{ compiler('cxx') }}   # [not linux]
     - {{ compiler('c') }}     # [not linux]
     - {{ stdlib('c') }}
@@ -62,10 +61,18 @@ outputs:
       - Library/include/c++         # [win]
       # also for C++20 modules
       - lib/libc++.modules.json     # [unix]
+      - lib/libc++.a                # [unix]
+      - lib/libc++experimental.a    # [unix]
+      - Library/lib/c++*.lib        # [win]
+      - Library/lib/libc++*.lib     # [win]
+      - lib/libc++.so               # [linux]
+      - lib/libc++.dylib            # [osx]
+      
     requirements:
       host:
         - {{ pin_subpackage("libcxx", exact=True) }}
       run:
+        - tzdata
         - {{ pin_subpackage("libcxx", exact=True) }}
       # run_constrained:
       #   - clang {{ version }}
@@ -73,33 +80,38 @@ outputs:
       #   - llvm-openmp  {{ version }}
       #   - llvm-tools  {{ version }}
 
-    # test:
-    #   requires:
-    #     - clang {{ bootstrap_version }}                 # [osx]
-    #     - clangxx {{ bootstrap_version }}
-    #     - ld64                   # [osx]
-    #     - cctools                # [osx]
-    #     - llvmdev {{ bootstrap_version }}  # [osx]
-    #     - llvm-tools  {{ bootstrap_version }}            # [osx]
-    #     - {{ compiler('cxx') }}   # [not linux]
-    #     - {{ compiler('c') }}     # [not linux]
-    #     - {{ stdlib('c') }}       # [osx]
-    #   files:
-    #     - test_sources
-    #     - compile_test.sh   # [unix]
-    #     - compile_test.bat  # [win]
-    #   commands:
-    #     # Dummy var for different hashes
-    #     - echo {{ dummy_var }}                                    # [osx]
-    #     - echo {{ macos_min_version }}                            # [osx]
-    #     - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
-    #     - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
-    #     - bash compile_test.sh                                    # [unix]
-    #     - compile_test.bat                                        # [win]
-    #     # we do not ship libcxxabi on OSX - this breaks exception passing
-    #     - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
-    #     - test -f $PREFIX/lib/libc++abi.so                        # [linux]
-
+    test:
+      requires:
+        - clang                  # [osx]
+        - clangxx
+        - ld64                   # [osx]
+        - cctools                # [osx]
+        - llvmdev {{ bootstrap_version }}  # [osx]
+        - llvm-tools             # [osx]
+        - {{ compiler('cxx') }}   # [not linux]
+        - {{ compiler('c') }}     # [not linux]
+      files:
+        - test_sources
+        - compile_test.sh   # [unix]
+        - compile_test.bat  # [win]
+      commands:
+        # Dummy var for different hashes
+        - echo {{ macos_min_version }}                            # [osx]
+        - if not exist %LIBRARY_INC%\\c++\\v1\\iterator exit 1    # [win]
+        - test -f $PREFIX/include/c++/v1/iterator                 # [unix]
+        - bash compile_test.sh                                    # [unix]
+        - compile_test.bat                                        # [win]
+        - test -f $PREFIX/lib/libc++.a                  # [unix]
+        - test -f $PREFIX/lib/libc++experimental.a      # [unix]
+        # we do not ship libcxxabi on OSX - this breaks exception passing
+        - if [ -f $PREFIX/lib/libc++abi.dylib ]; then exit 1; fi  # [osx]
+        - test -f $PREFIX/lib/libc++abi.so                        # [linux]
+        # Test for non-versioned symlinks
+        - test -f $PREFIX/lib/libc++.so                 # [linux]
+        - test -f $PREFIX/lib/libc++.dylib              # [osx]
+        # Verify the symlinks point to versioned libraries
+        - test -f $(readlink -f $PREFIX/lib/libc++.so)     # [linux]
+        - test -f $(readlink -f $PREFIX/lib/libc++.dylib)  # [osx]
 
   # Honestly not sure where the 'hardening' is used (or if) but leaving it here for
   # consistency. There are also some comments in here that I think may be out of date
@@ -117,17 +129,12 @@ outputs:
         # compiler('c'), and conda keeps that despite ignoring the cxx run-exports
         - {{ compiler('cxx') }}
     files:
-      - lib/libc++.so               # [linux]
       - lib/libc++.so.*             # [linux]
-      - lib/libc++.dylib            # [osx]
       - lib/libc++.*.dylib          # [osx]
       - Library/bin/c++*.dll        # [win]
-      - lib/libc++.a                # [unix]
-      - lib/libc++experimental.*    # [unix]
-      - Library/lib/c++*.lib        # [win]
-      - Library/lib/libc++*.lib     # [win]
     requirements:
       build:
+        - {{ stdlib('c') }}
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
       host:
@@ -141,13 +148,20 @@ outputs:
       #   - llvm-tools  {{ version }}
     test:
       commands:
-        # presence of shared & static libraries
-        - test -f $PREFIX/lib/libc++.so                 # [linux]
-        - test -f $PREFIX/lib/libc++.dylib              # [osx]
-        - test -f $PREFIX/lib/libc++.a                  # [unix]
-        - test -f $PREFIX/lib/libc++experimental.a      # [unix]
+        # Test for versioned runtime libraries
+        - test -f $PREFIX/lib/libc++.so.1               # [linux]
+        - test -f $PREFIX/lib/libc++.so.1.0             # [linux]
+        - test -f $PREFIX/lib/libc++.1.dylib            # [osx]
+
+        # Ensure non-versioned symlinks are NOT in runtime package
+        - test ! -L $PREFIX/lib/libc++.so               # [linux]
+        - test ! -L $PREFIX/lib/libc++.dylib            # [osx]
+        
         # absence of headers
         - test ! -d $PREFIX/include/c++                 # [unix]
+
+        # absence of static libraries in runtime package
+        - test ! -f $PREFIX/lib/libc++.a                # [unix]
 
   - name: libcxxabi
     build:
@@ -156,6 +170,7 @@ outputs:
       - lib/libc++abi.*
     requirements:
       build:
+        - {{ stdlib('c') }}
         - {{ compiler('c') }}
       # run_constrained:
       #   - libcxx {{ version }}.*
