@@ -74,11 +74,11 @@ outputs:
       run:
         - tzdata
         - {{ pin_subpackage("libcxx", exact=True) }}
-      # run_constrained:
-      #   - clang {{ version }}
-      #   - llvm {{ version }}
-      #   - llvm-openmp  {{ version }}
-      #   - llvm-tools  {{ version }}
+      run_constrained:
+        - clang {{ version }}
+        - llvm {{ version }}
+        - llvm-openmp  {{ version }}
+        - llvm-tools  {{ version }}
 
     test:
       requires:
@@ -141,11 +141,11 @@ outputs:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
-      # run_constrained:
-      #   - clang {{ version }}
-      #   - llvm {{ version }}
-      #   - llvm-openmp  {{ version }}
-      #   - llvm-tools  {{ version }}
+      run_constrained:
+        - clang {{ version }}
+        - llvm {{ version }}
+        - llvm-openmp  {{ version }}
+        - llvm-tools  {{ version }}
     test:
       commands:
         # Test for versioned runtime libraries
@@ -172,8 +172,8 @@ outputs:
       build:
         - {{ stdlib('c') }}
         - {{ compiler('c') }}
-      # run_constrained:
-      #   - libcxx {{ version }}.*
+      run_constrained:
+        - libcxx {{ version }}.*
     test:
       commands:
         - test -f $PREFIX/lib/libc++abi${SHLIB_EXT}  # [unix]
