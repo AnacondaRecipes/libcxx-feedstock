@@ -1,7 +1,7 @@
-{% set version = "19.1.7" %}
+{% set version = "20.1.8" %}
 {% set major = version.split(".")[0] %}
 
-{% set bootstrap_version = "19.1.7" %}
+{% set bootstrap_version = "20.1.8" %}
 
 
 package:
@@ -9,8 +9,8 @@ package:
   version: {{ version }}
 
 source:
-  - url: https://github.com/llvm/llvm-project/releases/download/llvmorg-{{ version.replace(".rc", "-rc") }}/llvm-project-{{ version.replace(".rc", "rc") }}.src.tar.xz
-    sha256: 82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501
+  - url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-{{ version.replace(".rc", "-rc") }}.tar.gz
+    sha256: a6cbad9b2243b17e87795817cfff2107d113543a12486586f8a055a2bb044963
     patches:
       # disable feature that requires up-to-date libcxxabi, which we don't ship
       - patches/0001-disable-_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPT.patch  # [osx]
@@ -20,7 +20,7 @@ source:
       - patches/0003-patch-__libcpp_tzdb_directory-to-allow-use-on-osx.patch  # [osx]
 
 build:
-  number: 3
+  number: 0
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation

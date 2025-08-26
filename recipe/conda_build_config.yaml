@@ -7,7 +7,7 @@ cxx_compiler:         # [osx]
 # https://libcxx.llvm.org/index.html#platform-and-compiler-support
 c_compiler_version:
   - 11.2                # [linux]
-  - 19                  # [osx]
+  - 20                  # [osx]
 cxx_compiler_version:
   - 11.2                # [linux]
-  - 19                  # [osx]
+  - 20                  # [osx]
