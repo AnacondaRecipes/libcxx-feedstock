@@ -20,7 +20,7 @@ source:
       - patches/0003-patch-__libcpp_tzdb_directory-to-allow-use-on-osx.patch  # [osx]
 
 build:
-  number: 3
+  number: 4
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation
@@ -54,6 +54,12 @@ requirements:
 outputs:
 
   - name: libcxx-devel
+    build:
+      # The unversioned libc++ symlinks (e.g., libc++.dylib, libc++.so) are in this package
+      # and are used at build/link time. At runtime, binaries use the versioned libraries
+      # from the libcxx package, so we only need to export libcxx as a runtime dependency.
+      run_exports:
+        - {{ pin_subpackage("libcxx", max_pin="x") }}
     files:
       - include/c++                 # [unix]
       # for C++20 modules, which are installed into $PREFIX/share/libc++
