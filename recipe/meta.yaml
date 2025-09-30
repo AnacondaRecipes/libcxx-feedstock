@@ -46,7 +46,6 @@ requirements:
     - {{ stdlib('c') }}
     - clangxx                 # [linux]
     - clang                   # [linux]
-    - python                  # [not osx]
     - llvm
   host:
     - clangdev {{ bootstrap_version }}  # [not osx]
