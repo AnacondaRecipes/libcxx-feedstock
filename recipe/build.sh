@@ -14,6 +14,11 @@ export CFLAGS="$CFLAGS -I$LLVM_PREFIX/include -I$BUILD_PREFIX/include"
 export LDFLAGS="$LDFLAGS -L$LLVM_PREFIX/lib -Wl,-rpath,$LLVM_PREFIX/lib -L$BUILD_PREFIX/lib -Wl,-rpath,$BUILD_PREFIX/lib"
 export PATH="$LLVM_PREFIX/bin:$PATH"
 
+# On Linux, explicitly use Clang compilers to avoid GCC warning flag issues
+if [[ "$target_platform" == linux-* ]]; then
+    export CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
+fi
+
 mkdir build
 
 cmake -G Ninja \

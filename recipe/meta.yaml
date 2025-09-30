@@ -18,9 +18,10 @@ source:
       - patches/0002-Work-around-stray-nostdlib-flags-causing-errors-with.patch  # [osx]
       # allow chrono implementation to work on osx
       - patches/0003-patch-__libcpp_tzdb_directory-to-allow-use-on-osx.patch  # [osx]
+      - patches/0004-fix-abi-break.patch
 
 build:
-  number: 0
+  number: 1
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation
@@ -45,7 +46,6 @@ requirements:
     - {{ stdlib('c') }}
     - clangxx                 # [linux]
     - clang                   # [linux]
-    - python                  # [not osx]
     - llvm
   host:
     - clangdev {{ bootstrap_version }}  # [not osx]
