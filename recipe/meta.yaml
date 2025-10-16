@@ -1,5 +1,5 @@
 {% set version = "19.1.7" %}
-{% set major = version.split(".")[0] %}
+{% set major = version.split(".")[0]|int %}
 
 {% set bootstrap_version = "19.1.7" %}
 
@@ -20,7 +20,7 @@ source:
       - patches/0003-patch-__libcpp_tzdb_directory-to-allow-use-on-osx.patch  # [osx]
 
 build:
-  number: 3
+  number: 4
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation
@@ -45,7 +45,6 @@ requirements:
     - {{ stdlib('c') }}
     - clangxx                 # [linux]
     - clang                   # [linux]
-    - python                  # [not osx]
     - llvm
   host:
     - clangdev {{ bootstrap_version }}  # [not osx]
@@ -73,13 +72,11 @@ outputs:
         - {{ pin_subpackage("libcxx", exact=True) }}
       run:
         - tzdata
-        - {{ pin_subpackage("libcxx", exact=True) }}
-      run_constrained:
-        - clang {{ version }}
-        - llvm {{ version }}
-        - llvm-openmp  {{ version }}
-        - llvm-tools  {{ version }}
-
+        - {{ pin_subpackage("libcxx", max_pin=None) }}
+        # The runtime support tools' APIs with the LibCXX libraries will 
+        # generally remain forwards and backwards compatible, for at least 
+        # one major release. https://www.libcxx.org/INSTALL.html
+        - libcxx >={{ version }},<{{ major + 2 }}
     test:
       requires:
         - clang                  # [osx]
@@ -141,11 +138,6 @@ outputs:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
-      run_constrained:
-        - clang {{ version }}
-        - llvm {{ version }}
-        - llvm-openmp  {{ version }}
-        - llvm-tools  {{ version }}
     test:
       commands:
         # Test for versioned runtime libraries
