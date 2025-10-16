@@ -74,11 +74,6 @@ outputs:
       run:
         - tzdata
         - {{ pin_subpackage("libcxx", exact=True) }}
-      run_constrained:
-        - clang {{ version }}
-        - llvm {{ version }}
-        - llvm-openmp  {{ version }}
-        - llvm-tools  {{ version }}
 
     test:
       requires:
@@ -142,10 +137,7 @@ outputs:
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run_constrained:
-        - clang {{ version }}
-        - llvm {{ version }}
-        - llvm-openmp  {{ version }}
-        - llvm-tools  {{ version }}
+        - sysroot_{{ target_platform }} >={{ c_stdlib_version }}    # [linux]
     test:
       commands:
         # Test for versioned runtime libraries
