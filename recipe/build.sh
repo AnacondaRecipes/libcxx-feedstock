@@ -2,6 +2,14 @@ set -ex
 
 LLVM_PREFIX=$PREFIX
 
+# On Linux, explicitly use Clang compilers to avoid GCC warning flag issues
+# todo: switch back to gcc when we have a recent enough version
+# https://libcxx.llvm.org/index.html#platform-and-compiler-support
+if [[ "$target_platform" == linux-* ]]; then
+    export CMAKE_EXTRA_ARGS="$CMAKE_EXTRA_ARGS -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
+fi
+
+
 if [[ "$target_platform" == osx-* ]]; then
     export CFLAGS="$CFLAGS -isysroot $CONDA_BUILD_SYSROOT"
     export CXXFLAGS="$CXXFLAGS -isysroot $CONDA_BUILD_SYSROOT"
