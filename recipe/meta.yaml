@@ -73,16 +73,10 @@ outputs:
       run:
         - tzdata
         - {{ pin_subpackage("libcxx", max_pin=None) }}
-        - libcxx >={{ version }},<{{ major + 2 }}
-      run_constrained:
         # The runtime support tools' APIs with the LibCXX libraries will 
         # generally remain forwards and backwards compatible, for at least 
         # one major release. https://www.libcxx.org/INSTALL.html
-        - clang >={{ major }},<{{ major + 2 }}
-        - llvm >={{ major }},<{{ major + 2 }}
-        - llvm-openmp  >={{ major }},<{{ major + 2 }}
-        - llvm-tools  >={{ major }},<{{ major + 2 }}
-
+        - libcxx >={{ version }},<{{ major + 2 }}
     test:
       requires:
         - clang                  # [osx]
@@ -144,14 +138,6 @@ outputs:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
       run:
         - {{ pin_subpackage("libcxxabi", exact=True) }}    # [linux]
-      run_constrained:
-        # The runtime support tools' APIs with the LibCXX libraries will 
-        # generally remain forwards and backwards compatible, for at least 
-        # one major release. https://www.libcxx.org/INSTALL.html
-        - clang >={{ major }},<{{ major + 2 }}
-        - llvm >={{ major }},<{{ major + 2 }}
-        - llvm-openmp  >={{ major }},<{{ major + 2 }}
-        - llvm-tools  >={{ major }},<{{ major + 2 }}
     test:
       commands:
         # Test for versioned runtime libraries
