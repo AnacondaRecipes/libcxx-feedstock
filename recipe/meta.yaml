@@ -160,6 +160,8 @@ outputs:
   - name: libcxxabi
     build:
       skip: true  # [not linux]
+      missing_dso_whitelist:
+        - /lib64/libgcc_s.so.1    # [linux]
     files:
       - lib/libc++abi.*
     requirements:
