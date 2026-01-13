@@ -6,6 +6,6 @@ build_parameters:
 staging_channel_upload_target: llvm-21.1.8-stage2-build-0
 
 channels:
-  - https://staging.continuum.io/prefect/llvm-21.1.8-stage2-build-0
+  - https://staging.continuum.io/pbp/llvm-21.1.8-stage2-build-0
 
 aggregate_check: false
