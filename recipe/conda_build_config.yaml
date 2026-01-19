@@ -5,11 +5,10 @@ cxx_compiler:         # [osx]
 
 # libcxx only supports the last released GCC version, see
 # https://libcxx.llvm.org/index.html#platform-and-compiler-support
-# Note: Must use LLVM 20 compiler because clang_bootstrap 21 doesn't exist yet
-# (clang_bootstrap is built from clang-compiler-activation, which depends on clangdev 21)
+# Stage 2: Self-hosted build with clang 21 compiler
 c_compiler_version:
   - 11.2                # [linux]
-  - 20                  # [osx]
+  - 21                  # [osx]
 cxx_compiler_version:
   - 11.2                # [linux]
-  - 20                  # [osx]
+  - 21                  # [osx]
