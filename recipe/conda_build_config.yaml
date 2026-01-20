@@ -5,7 +5,6 @@ cxx_compiler:         # [osx]
 
 # libcxx only supports the last released GCC version, see
 # https://libcxx.llvm.org/index.html#platform-and-compiler-support
-# Stage 2: Self-hosted build with clang 21 compiler
 c_compiler_version:
   - 11.2                # [linux]
   - 21                  # [osx]
