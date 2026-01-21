@@ -1,8 +1,7 @@
 {% set version = "21.1.8" %}
 {% set major = version.split(".")[0]|int %}
 
-# Stage 0: Use LLVM 20 to bootstrap LLVM 21
-{% set bootstrap_version = "20.1.8" %}
+{% set bootstrap_version = version %}
 
 
 package:
