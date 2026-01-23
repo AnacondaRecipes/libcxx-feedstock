@@ -1,7 +1,7 @@
-{% set version = "20.1.8" %}
+{% set version = "21.1.8" %}
 {% set major = version.split(".")[0]|int %}
 
-{% set bootstrap_version = "20.1.8" %}
+{% set bootstrap_version = version %}
 
 
 package:
@@ -10,7 +10,7 @@ package:
 
 source:
   - url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: a6cbad9b2243b17e87795817cfff2107d113543a12486586f8a055a2bb044963
+    sha256: 7ba3f2a8d8fda88be18a31d011e8195d3b7f87f9fa92b20c94cba2d7f65b0e3f
     patches:
       # disable feature that requires up-to-date libcxxabi, which we don't ship
       - patches/0001-disable-_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPT.patch  # [osx]
@@ -20,7 +20,7 @@ source:
       - patches/0003-patch-__libcpp_tzdb_directory-to-allow-use-on-osx.patch  # [osx]
 
 build:
-  number: 1
+  number: 0
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation
@@ -159,6 +159,9 @@ outputs:
   - name: libcxxabi
     build:
       skip: true  # [not linux]
+      missing_dso_whitelist:
+        - lib/libgcc_s.so.1       # [linux]
+        - /lib64/libgcc_s.so.1    # [linux]
     files:
       - lib/libc++abi.*
     requirements:
