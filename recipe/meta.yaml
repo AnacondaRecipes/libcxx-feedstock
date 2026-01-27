@@ -159,6 +159,11 @@ outputs:
   - name: libcxxabi
     build:
       skip: true  # [not linux]
+      # Workaround for LIEF <=0.16 not recognizing DT_TLSDESC_PLT ELF tag (0x6ffffef6)
+      # on aarch64 binaries. Remove when LIEF is fixed.
+      # See: https://github.com/conda/conda-build/issues/5665
+      overlinking_ignore_patterns:
+        - lib/libc++abi.so*  # [linux and aarch64]
       missing_dso_whitelist:
         - lib/libgcc_s.so.1       # [linux]
         - /lib64/libgcc_s.so.1    # [linux]
