@@ -5,6 +5,7 @@ cxx_compiler:         # [osx]
 
 # libcxx only supports the last released GCC version, see
 # https://libcxx.llvm.org/index.html#platform-and-compiler-support
+# Stage 0: Bootstrap build with LLVM 21 compiler (update to 22 in Stage 2)
 c_compiler_version:
   - 11.2                # [linux]
   - 21                  # [osx]
