@@ -1,6 +1,7 @@
-{% set version = "21.1.8" %}
+{% set version = "22.1.2" %}
 {% set major = version.split(".")[0]|int %}
 
+# Stage 2: self-hosted build
 {% set bootstrap_version = version %}
 
 
@@ -10,7 +11,7 @@ package:
 
 source:
   - url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: 7ba3f2a8d8fda88be18a31d011e8195d3b7f87f9fa92b20c94cba2d7f65b0e3f
+    sha256: a252efd7a4a268d2cc5145b17adcaa82757fdee1d06d748b4c24137807710ecb
     patches:
       # disable feature that requires up-to-date libcxxabi, which we don't ship
       - patches/0001-disable-_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPT.patch  # [osx]
