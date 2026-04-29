@@ -9,4 +9,3 @@ upstream_sources:
     packages:
       - libcxx
       - libcxx-devel
-      - libcxxabi
