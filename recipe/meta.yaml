@@ -1,8 +1,10 @@
-{% set version = "22.1.2" %}
+{% set version = "23.1.4" %}
 {% set major = version.split(".")[0]|int %}
 
-# Stage 2: self-hosted build
-{% set bootstrap_version = version %}
+# Built with the released LLVM 22 toolchain (release-first order: libcxx -> llvmdev -> clangdev);
+# clang_bootstrap {{ major }} only exists once clang-compiler-activation {{ major }} is released.
+# Selects the Linux host clangdev/llvm and the macOS test llvmdev.
+{% set bootstrap_version = "22.1.2" %}
 
 
 package:
@@ -11,7 +13,7 @@ package:
 
 source:
   - url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: a252efd7a4a268d2cc5145b17adcaa82757fdee1d06d748b4c24137807710ecb
+    sha256: 3e1c70b30f623976c2046d94b8eeab6cac536f107914cb4ed7bac572a03131db
     patches:
       # disable feature that requires up-to-date libcxxabi, which we don't ship
       - patches/0001-disable-_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPT.patch  # [osx]
@@ -39,7 +41,7 @@ build:
 requirements:
   build:
     - cmake
-    - ninja
+    - ninja-base
     - make                    # [unix]
     - {{ compiler('cxx') }}   # [not linux]
     - {{ compiler('c') }}     # [not linux]
@@ -81,14 +83,15 @@ outputs:
 
     test:
       requires:
+        # macOS: clangxx N hard-runs libcxx-devel N and the clang_bootstrap bundle ({{ compiler('c') }})
+        # ships its own libc++ headers/libs - both would clobber the libcxx-devel under test, so test
+        # with the released clang + ld64/cctools only; compile_test.sh uses `clang --driver-mode=g++`
         - clang                  # [osx]
-        - clangxx
+        - clangxx                # [not osx]
         - ld64                   # [osx]
         - cctools                # [osx]
         - llvmdev {{ bootstrap_version }}  # [osx]
         - llvm-tools             # [osx]
-        - {{ compiler('cxx') }}   # [not linux]
-        - {{ compiler('c') }}     # [not linux]
       files:
         - test_sources
         - compile_test.sh   # [unix]
