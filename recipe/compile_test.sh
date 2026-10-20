@@ -11,6 +11,18 @@ else
     LINK_FLAGS="${LINK_FLAGS} -lc++abi"
 fi
 
+# The package under test must provide both the headers and the runtime: assert the
+# compiled-in _LIBCPP_VERSION matches this version and that the binary loads $PREFIX's libc++
+IFS=. read -r _maj _min _pat <<< "${PKG_VERSION}"
+EXPECTED_LIBCPP_VERSION=$((_maj * 10000 + _min * 100 + _pat))
+$CXX -stdlib=libc++ -O2 -g test_sources/check_libcpp_def.cpp $LINK_FLAGS
+./a.out | grep -x "_LIBCPP_VERSION is ${EXPECTED_LIBCPP_VERSION}"
+if [[ "$target_platform" == osx* ]]; then
+    DYLD_PRINT_LIBRARIES=1 ./a.out 2>&1 | grep -F "$PREFIX/lib/libc++.1"
+else
+    LD_DEBUG=libs ./a.out 2>&1 | grep -F "$PREFIX/lib/libc++.so.1"
+fi
+
 FILES=test_sources/*.c
 for f in $FILES
 do
