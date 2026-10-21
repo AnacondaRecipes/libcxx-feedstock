@@ -1,8 +1,10 @@
-{% set version = "22.1.2" %}
+{% set version = "23.1.4" %}
 {% set major = version.split(".")[0]|int %}
 
-# Stage 2: self-hosted build
-{% set bootstrap_version = version %}
+# Built with the released LLVM 22 toolchain (release-first order: libcxx -> llvmdev -> clangdev);
+# clang_bootstrap {{ major }} only exists once clang-compiler-activation {{ major }} is released.
+# Selects the Linux host clangdev/llvm and the macOS test llvmdev.
+{% set bootstrap_version = "22.1.2" %}
 
 
 package:
@@ -11,7 +13,7 @@ package:
 
 source:
   - url: https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-{{ version.replace(".rc", "-rc") }}.tar.gz
-    sha256: a252efd7a4a268d2cc5145b17adcaa82757fdee1d06d748b4c24137807710ecb
+    sha256: 3e1c70b30f623976c2046d94b8eeab6cac536f107914cb4ed7bac572a03131db
     patches:
       # disable feature that requires up-to-date libcxxabi, which we don't ship
       - patches/0001-disable-_LIBCPP_AVAILABILITY_HAS_INIT_PRIMARY_EXCEPT.patch  # [osx]
@@ -39,7 +41,9 @@ build:
 requirements:
   build:
     - cmake
-    - ninja
+    - ninja-base
+    # runtimes/CMakeLists.txt: find_package(Python3 REQUIRED COMPONENTS Interpreter); ninja-base brings no python
+    - python
     - make                    # [unix]
     - {{ compiler('cxx') }}   # [not linux]
     - {{ compiler('c') }}     # [not linux]
@@ -81,14 +85,15 @@ outputs:
 
     test:
       requires:
+        # macOS: clangxx 22 requires libcxx-devel 22.1.*, and the clang_bootstrap bundle ships its own
+        # libc++ headers and dylibs; either would replace the libcxx 23 under test. So test with clang
+        # (no libcxx-devel requirement) + ld64/cctools; compile_test.sh runs C++ via `clang --driver-mode=g++`.
         - clang                  # [osx]
-        - clangxx
+        - clangxx                # [not osx]
         - ld64                   # [osx]
         - cctools                # [osx]
         - llvmdev {{ bootstrap_version }}  # [osx]
         - llvm-tools             # [osx]
-        - {{ compiler('cxx') }}   # [not linux]
-        - {{ compiler('c') }}     # [not linux]
       files:
         - test_sources
         - compile_test.sh   # [unix]
@@ -112,17 +117,8 @@ outputs:
         - test -f $(readlink -f $PREFIX/lib/libc++.so)     # [linux]
         - test -f $(readlink -f $PREFIX/lib/libc++.dylib)  # [osx]
 
-  # Honestly not sure where the 'hardening' is used (or if) but leaving it here for
-  # consistency. There are also some comments in here that I think may be out of date
-  # but I haven't had a chance to check on them because they seem reasonable.
   - name: libcxx
     build:
-      string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}        # [hardening == "none"]
-      string: debug_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [hardening == "debug"]
-      run_exports:                                      # [hardening == "debug"]
-        # packages built with hardened lib must not be installable without extra label
-        - libcxx =*=debug*                              # [hardening == "debug"]
-        - libcxx                                        # [hardening == "none"]
       ignore_run_exports_from:
         # we want to ignore libstdcxx, but not libgcc; the latter also comes in through
         # compiler('c'), and conda keeps that despite ignoring the cxx run-exports
