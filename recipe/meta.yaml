@@ -85,9 +85,9 @@ outputs:
 
     test:
       requires:
-        # macOS: clangxx N hard-runs libcxx-devel N and the clang_bootstrap bundle ({{ compiler('c') }})
-        # ships its own libc++ headers/libs - both would clobber the libcxx-devel under test, so test
-        # with the released clang + ld64/cctools only; compile_test.sh uses `clang --driver-mode=g++`
+        # macOS: clangxx 22 requires libcxx-devel 22.1.*, and the clang_bootstrap bundle ships its own
+        # libc++ headers and dylibs; either would replace the libcxx 23 under test. So test with clang
+        # (no libcxx-devel requirement) + ld64/cctools; compile_test.sh runs C++ via `clang --driver-mode=g++`.
         - clang                  # [osx]
         - clangxx                # [not osx]
         - ld64                   # [osx]
@@ -117,16 +117,8 @@ outputs:
         - test -f $(readlink -f $PREFIX/lib/libc++.so)     # [linux]
         - test -f $(readlink -f $PREFIX/lib/libc++.dylib)  # [osx]
 
-  # Honestly not sure where the 'hardening' is used (or if) but leaving it here for
-  # consistency. There are also some comments in here that I think may be out of date
-  # but I haven't had a chance to check on them because they seem reasonable.
   - name: libcxx
     build:
-      string: h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}        # [hardening == "none"]
-      string: debug_h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [hardening == "debug"]
-      run_exports:                                      # [hardening == "debug"]
-        # packages built with hardened lib must not be installable without extra label
-        - libcxx =*=debug*                              # [hardening == "debug"]
       ignore_run_exports_from:
         # we want to ignore libstdcxx, but not libgcc; the latter also comes in through
         # compiler('c'), and conda keeps that despite ignoring the cxx run-exports
