@@ -5,10 +5,10 @@ cxx_compiler:         # [osx]
 
 # libcxx only supports the last released GCC version, see
 # https://libcxx.llvm.org/index.html#platform-and-compiler-support
-# macOS: build with the released clang_bootstrap (LLVM 22); see bootstrap_version in meta.yaml
+# macOS: self-hosted build with clang_bootstrap 23; see bootstrap_version in meta.yaml
 c_compiler_version:
   - 11.2                # [linux]
-  - 22                  # [osx]
+  - 23                  # [osx]
 cxx_compiler_version:
   - 11.2                # [linux]
-  - 22                  # [osx]
+  - 23                  # [osx]
