@@ -1,10 +1,10 @@
 {% set version = "23.1.4" %}
 {% set major = version.split(".")[0]|int %}
 
-# Built with the released LLVM 22 toolchain (release-first order: libcxx -> llvmdev -> clangdev);
-# clang_bootstrap {{ major }} only exists once clang-compiler-activation {{ major }} is released.
-# Selects the Linux host clangdev/llvm and the macOS test llvmdev.
-{% set bootstrap_version = "22.1.2" %}
+# Self-hosted rebuild: built with the LLVM {{ major }} toolchain (macOS clang_bootstrap {{ major }}
+# from clang-compiler-activation {{ major }}, see conda_build_config.yaml).
+# Selects the Linux host clangdev/llvm (whose clang compiles libc++) and the macOS test llvmdev.
+{% set bootstrap_version = version %}
 
 
 package:
@@ -23,7 +23,7 @@ source:
       - patches/0003-patch-__libcpp_tzdb_directory-to-allow-use-on-osx.patch  # [osx]
 
 build:
-  number: 0
+  number: 1
   skip: true  # [win]
   
   # Prevent mixing with GNU's implementation
@@ -85,8 +85,8 @@ outputs:
 
     test:
       requires:
-        # macOS: clangxx 22 requires libcxx-devel 22.1.*, and the clang_bootstrap bundle ships its own
-        # libc++ headers and dylibs; either would replace the libcxx 23 under test. So test with clang
+        # macOS: clangxx pulls in its own libcxx-devel, and the clang_bootstrap bundle ships its own
+        # libc++ headers and dylibs; either could shadow the libcxx under test. So test with clang
         # (no libcxx-devel requirement) + ld64/cctools; compile_test.sh runs C++ via `clang --driver-mode=g++`.
         - clang                  # [osx]
         - clangxx                # [not osx]
